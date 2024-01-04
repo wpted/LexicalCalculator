@@ -3,8 +3,7 @@ package token
 const (
     CALC = "CALC"
 
-    LEFTQUOTE  = "LEFTQUOTE"
-    RIGHTQUOTE = "RIGHTQUOTE"
+    SINGLEQUOTE = "SINGLEQUOTE"
 
     INT = "INT"
 
@@ -12,6 +11,9 @@ const (
     MINUS    = "-"
     ASTERISK = "*"
     SLASH    = "/"
+
+    UNKNOWN = "UNKNOWN"
+    EOF     = "EOF"
 )
 
 // Token is the result of after parsing input with a lexer.
