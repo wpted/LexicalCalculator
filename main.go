@@ -17,8 +17,10 @@ func main() {
     // Should handle error like zero-divisions.
     // TODO 0: Create CLI environment(repl), takes commands; ['calc', 'end'].
     fmt.Println("Start calculator.")
+    fmt.Println(">>>>")
     scanner := bufio.NewScanner(os.Stdin)
     for {
+        fmt.Print(">> ")
         scanner.Scan()
         cmd := scanner.Text()
 
@@ -26,7 +28,8 @@ func main() {
         case QUIT:
             return
         default:
-            fmt.Println(cmd)
+
+            fmt.Printf(">> result: %s\n", cmd)
         }
     }
 
