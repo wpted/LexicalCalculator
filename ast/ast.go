@@ -23,7 +23,7 @@ type Node struct {
     IsOperator bool
     Operator   string
     IsValue    bool
-    Value      int
+    Value      float32
     Left       *Node
     Right      *Node
 }
