@@ -1,6 +1,9 @@
 package ast
 
-import "LexicalCalculator/token"
+import (
+    "LexicalCalculator/token"
+    "errors"
+)
 
 // an equation like this
 // 5 + 2 * 3
@@ -10,6 +13,10 @@ import "LexicalCalculator/token"
 //     5   *
 //        / \
 //       2   3
+
+var (
+    ErrZeroDivision = errors.New("error cannot use 0 as denominator")
+)
 
 // Root should be the ast root of a calculator prompt.
 type Root struct {
@@ -26,4 +33,53 @@ type Node struct {
     Value      float32
     Left       *Node
     Right      *Node
+}
+
+// New creates a new Node.
+func New(value float32, isValue bool, operation string, isOperator bool, leftChild *Node, rightNode *Node) *Node {
+    return &Node{
+        IsOperator: isOperator,
+        Operator:   operation,
+        IsValue:    isValue,
+        Value:      value,
+        Left:       leftChild,
+        Right:      rightNode,
+    }
+}
+
+// Evaluate evaluates the current node and return the result of the equation.
+func Evaluate(equationNode *Node) (float32, error) {
+    // Scenarios
+    // 1. 6 ( One single integer )
+    // 2. 6 + 5 ( Binary Expression )
+    if equationNode.IsValue {
+        return equationNode.Value, nil
+    }
+
+    if equationNode.IsOperator {
+        left, err := Evaluate(equationNode.Left)
+        right, err := Evaluate(equationNode.Right)
+
+        switch equationNode.Operator {
+        case "+":
+            return left + right, err
+        case "-":
+            return left - right, err
+        case "*":
+            return left * right, err
+        case "/":
+            if right == 0 {
+                return 0, ErrZeroDivision
+            }
+            return left / right, err
+        }
+    }
+
+    // If node is neither an operator nor a value, it is 0.
+    // Consider ' + 5 '
+    // it's   +
+    //       / \
+    //     nil  5
+    // the value of the left child should be considered as 0.
+    return 0, nil
 }
