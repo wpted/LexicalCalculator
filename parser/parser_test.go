@@ -2,6 +2,7 @@ package parser
 
 import (
     "LexicalCalculator/lexer"
+    "LexicalCalculator/token"
     "errors"
     "testing"
 )
@@ -13,10 +14,25 @@ func TestParser_Parse(t *testing.T) {
     t.Run("Correct input", func(t *testing.T) {
         input := "calc '5 + 5'"
         p.l.Input(input)
-        _, err := p.Parse()
+        root, err := p.Parse()
         if err != nil {
-            t.Errorf("")
+            t.Errorf("Error parsing calculator prompt, got error: %v.\n", err)
         }
+
+        // Check the first token, should be a calc token.
+        if root.Token.LexicalType != token.CALC {
+            t.Errorf("error root token type: expected %s, got %s.\n", token.CALC, root.Token.LexicalType)
+        }
+
+        if root.Token.Literal != "calc" {
+            t.Errorf("error root token literal: expected %s, got %s.\n", "calc", root.Token.Literal)
+        }
+
+        // TODO: Check the parsed equation expression.
+        if root.Equation == nil {
+            t.Errorf("error parsing equation")
+        }
+
     })
 
     t.Run("Incorrect input", func(t *testing.T) {
