@@ -27,7 +27,7 @@ func TestLexer_ReadNextToken(t *testing.T) {
         {
             input: "",
             result: []token.Token{
-                {Literal: "", LexicalType: token.EOF},
+                {Literal: token.EOF, LexicalType: token.EOF},
             },
         },
         {
@@ -38,7 +38,7 @@ func TestLexer_ReadNextToken(t *testing.T) {
                 {Literal: "*", LexicalType: token.ASTERISK},
                 {Literal: "/", LexicalType: token.SLASH},
                 {Literal: "'", LexicalType: token.SINGLEQUOTE},
-                {Literal: "EOF", LexicalType: token.EOF},
+                {Literal: token.EOF, LexicalType: token.EOF},
             },
         },
         {
@@ -50,7 +50,7 @@ func TestLexer_ReadNextToken(t *testing.T) {
                 {Literal: "*", LexicalType: token.ASTERISK},
                 {Literal: "/", LexicalType: token.SLASH},
                 {Literal: "'", LexicalType: token.SINGLEQUOTE},
-                {Literal: "EOF", LexicalType: token.EOF},
+                {Literal: token.EOF, LexicalType: token.EOF},
             },
         },
         {
@@ -58,6 +58,7 @@ func TestLexer_ReadNextToken(t *testing.T) {
             result: []token.Token{
                 {Literal: "368000", LexicalType: token.INT},
                 {Literal: "12345", LexicalType: token.INT},
+                {Literal: token.EOF, LexicalType: token.EOF},
             },
         },
         {
@@ -65,16 +66,17 @@ func TestLexer_ReadNextToken(t *testing.T) {
             result: []token.Token{
                 {Literal: "calc", LexicalType: token.CALC},
                 {Literal: "hello", LexicalType: token.UNKNOWN},
+                {Literal: token.EOF, LexicalType: token.EOF},
             },
         },
         {
-            input: "calc '5 + 5'",
+            input: "calc '5 + 56'",
             result: []token.Token{
                 {Literal: "calc", LexicalType: token.CALC},
                 {Literal: "'", LexicalType: token.SINGLEQUOTE},
                 {Literal: "5", LexicalType: token.INT},
                 {Literal: "+", LexicalType: token.PLUS},
-                {Literal: "5", LexicalType: token.INT},
+                {Literal: "56", LexicalType: token.INT},
                 {Literal: "'", LexicalType: token.SINGLEQUOTE},
                 {Literal: "EOF", LexicalType: token.EOF},
             },
@@ -122,9 +124,6 @@ func TestLexer_ReadNextToken(t *testing.T) {
         var currTokenPosition int
         for {
             tok := l.ReadNextToken()
-            if tok.LexicalType == token.EOF {
-                break
-            }
             expectedToken := tc.result[currTokenPosition]
             if tok.Literal != expectedToken.Literal {
                 t.Errorf("Error token literal: expected %s, got %s.\n", expectedToken.Literal, tok.Literal)
@@ -133,7 +132,14 @@ func TestLexer_ReadNextToken(t *testing.T) {
             if tok.LexicalType != expectedToken.LexicalType {
                 t.Errorf("Error token type: expected %s, got %s.\n", expectedToken.LexicalType, tok.LexicalType)
             }
+
+            if tok.LexicalType == token.EOF {
+                break
+            }
             currTokenPosition++
+        }
+        if currTokenPosition+1 != len(tc.result) {
+            t.Errorf("Error parsed token length, expected %d, got %d.\n", len(tc.result), currTokenPosition+1)
         }
     }
 }
