@@ -8,13 +8,15 @@ package lexer
 import (
     "LexicalCalculator/token"
     "bytes"
+    "fmt"
 )
 
 // Lexer is the lexical analyzer used in the calculator.
 // It's supposed to be called by a parser and will lazily return the next token on the fly.
 // Lexer resets inputBuffer and resets field currPosition and nextPosition after receiving a new input.
 type Lexer struct {
-    inputBuffer  bytes.Buffer
+    inputBuffer  *bytes.Buffer
+    bufferLength int
     currPosition int
     nextPosition int
     errors       []error
@@ -23,7 +25,8 @@ type Lexer struct {
 // New creates a new Lexer.
 func New() *Lexer {
     return &Lexer{
-        inputBuffer:  bytes.Buffer{},
+        inputBuffer:  new(bytes.Buffer),
+        bufferLength: 0,
         currPosition: -1,
         nextPosition: 0,
     }
@@ -34,21 +37,23 @@ func (l *Lexer) Input(data string) {
     l.free()
     // Write appends the data to the buffer, growing the buffer as needed. The return value n is the length of p; err is always nil.
     // If the buffer becomes too large, Write will panic with ErrTooLarge.
-    _, _ = l.inputBuffer.Write([]byte(data))
+    writtenLength, _ := l.inputBuffer.Write([]byte(data))
+    l.bufferLength = writtenLength
 }
 
 // free resets the buffer to be empty, but it retains the underlying storage for use by future writes.
 func (l *Lexer) free() {
     l.inputBuffer.Reset()
+    l.bufferLength = 0
     l.currPosition = -1
     l.nextPosition = 0
 }
 
 // ReadNextToken returns a token after every read, skipping all encountered white spaces.
 func (l *Lexer) ReadNextToken() *token.Token {
-    tok := token.New("EOF", token.EOF)
+    tok := token.New(token.EOF, token.EOF)
 
-    if l.nextPosition > l.inputBuffer.Len() {
+    if l.nextPosition > l.bufferLength {
         return tok
     }
 
@@ -57,12 +62,7 @@ func (l *Lexer) ReadNextToken() *token.Token {
     l.nextPosition++
 
     // When encounter a white space, advance the pointer.
-    whiteSpaces := map[string]struct{}{
-        " ":  {},
-        "\n": {},
-        "\t": {},
-        "\r": {},
-    }
+    whiteSpaces := map[string]struct{}{" ": {}, "\n": {}, "\t": {}, "\r": {}}
 
     _, ok := whiteSpaces[string(next)]
     for ok {
@@ -89,7 +89,7 @@ func (l *Lexer) ReadNextToken() *token.Token {
         // We handle integers and 'calc' here.
         if isDigit(next[0]) {
             // The current ch is next[0].
-            // What we do here is to advance the pointer and fetch entire token.
+            // What we do here is to advance the pointer and fetch the entire token.
             literal := l.readNumber(next[0])
             tok = token.New(token.INT, literal)
         } else if isLetter(next[0]) {
@@ -112,22 +112,15 @@ func (l *Lexer) ReadNextToken() *token.Token {
 func (l *Lexer) readNumber(first byte) string {
     digits := make([]byte, 0)
     digits = append(digits, first)
-    next := l.inputBuffer.Next(1)
-
-    // Check if there's more after the first digit.
-    if len(next) != 0 {
-        for isDigit(next[0]) {
-
-            digits = append(digits, next[0])
-
+    for {
+        peekedToken, _ := peekBuffer(*l.inputBuffer, 1)
+        if isDigit(peekedToken) {
+            next := l.inputBuffer.Next(1)
             l.currPosition++
             l.nextPosition++
-            next = l.inputBuffer.Next(1)
-            if len(next) == 0 {
-                // If the next read byte is empty, we've reached an end.
-                // break here to prevent index out of range error (since next is []byte{}, index 0 is out of range).
-                break
-            }
+            digits = append(digits, next[0])
+        } else {
+            break
         }
     }
 
@@ -140,23 +133,42 @@ func (l *Lexer) readIdentifier(first byte) string {
     identifier := make([]byte, 0)
     identifier = append(identifier, first)
 
-    next := l.inputBuffer.Next(1)
-
-    if len(next) != 0 {
-        for isLetter(next[0]) {
-
+    for {
+        peekedToken, _ := peekBuffer(*l.inputBuffer, 1)
+        if isLetter(peekedToken) {
+            next := l.inputBuffer.Next(1)
             identifier = append(identifier, next[0])
-
             l.currPosition++
             l.nextPosition++
-            next = l.inputBuffer.Next(1)
-            if len(next) == 0 {
-                break
-            }
+        } else {
+            break
         }
     }
 
     return string(identifier)
+}
+
+// peekBuffer peeks at the next byte.
+// It's error should be ignored, since the only error should occur is io.EOF, which is also dealt with in ReadNextToken.
+func peekBuffer(buf bytes.Buffer, n int) (byte, error) {
+    if n <= 0 {
+        return 0, nil
+    }
+
+    // Check if there are enough bytes in the buffer to peek.
+    if buf.Len() < n {
+        return 0, fmt.Errorf("buffer has less than %d bytes", n)
+    }
+
+    // Read the next n bytes without consuming them.
+    peekedBytes, err := buf.ReadByte()
+
+    if err != nil {
+        // Including io.EOF and other unknown errors.
+        return 0, err
+    }
+
+    return peekedBytes, nil
 }
 
 // isDigit determines whether an input character is a number.
