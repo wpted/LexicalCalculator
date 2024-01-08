@@ -81,11 +81,3 @@ func (p *Parser) Parse() (*ast.Root, error) {
 
     return root, nil
 }
-
-func evaluate(equation string) int {
-    // Scenarios
-    // 1. 6 ( One single integer )
-    // 2. 6 + 5 ( Binary Expression )
-
-    return 0
-}
