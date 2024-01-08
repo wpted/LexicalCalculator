@@ -25,6 +25,12 @@ func TestLexer_ReadNextToken(t *testing.T) {
         result []token.Token
     }{
         {
+            input: "",
+            result: []token.Token{
+                {Literal: "", LexicalType: token.EOF},
+            },
+        },
+        {
             input: "+- */'",
             result: []token.Token{
                 {Literal: "+", LexicalType: token.PLUS},
