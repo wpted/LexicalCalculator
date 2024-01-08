@@ -46,9 +46,10 @@ func (l *Lexer) free() {
 
 // ReadNextToken returns a token after every read, skipping all encountered white spaces.
 func (l *Lexer) ReadNextToken() *token.Token {
-    var tok *token.Token
+    tok := token.New("EOF", token.EOF)
+
     if l.nextPosition > l.inputBuffer.Len() {
-        tok = token.New("EOF", token.EOF)
+        return tok
     }
 
     next := l.inputBuffer.Next(1)
