@@ -1,6 +1,7 @@
 package parser
 
 import (
+    "LexicalCalculator/ast"
     "LexicalCalculator/lexer"
     "LexicalCalculator/token"
     "errors"
@@ -64,7 +65,7 @@ func TestParser_Parse(t *testing.T) {
                 t.Errorf("error parsing equation: expected non nil root")
             }
 
-            result := evaluate(root.Equation)
+            result, _ := ast.Evaluate(root.Equation)
             if result != tc.result {
                 t.Errorf("error evaluated result: expected %f, got %f.\n", tc.result, result)
             }
