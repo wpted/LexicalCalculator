@@ -36,12 +36,16 @@ func TestParser_Parse(t *testing.T) {
     t.Run("Correct input", func(t *testing.T) {
         testCases := []struct {
             input  string
+            tokens int
             result float32
         }{
-            {input: "calc '1 + 2'", result: 3},
-            {input: "calc '2 - 1'", result: 1},
-            {input: "calc '2 * 3'", result: 6},
-            {input: "calc '3 / 2'", result: 1.5},
+            {input: "calc '1 + 2'", tokens: 3, result: 3},
+            {input: "calc '2 - 1'", tokens: 3, result: 1},
+            {input: "calc '2 * 3'", tokens: 3, result: 6},
+            {input: "calc '3 / 2'", tokens: 3, result: 1.5},
+            {input: "calc '2 + 3 + 4'", tokens: 5, result: 9},
+            {input: "calc '2 + 3 * 5'", tokens: 5, result: 17},
+            {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
         }
 
         for _, tc := range testCases {
@@ -60,14 +64,18 @@ func TestParser_Parse(t *testing.T) {
                 t.Errorf("error root token literal: expected %s, got %s.\n", "calc", root.Token.Literal)
             }
 
-            // TODO: Check the parsed equation expression.
-            if root.Equation == nil {
+            if root.EquationTokens == nil {
                 t.Errorf("error parsing equation: expected non nil root")
             }
 
-            result, _ := ast.Evaluate(root.Equation)
-            if result != tc.result {
-                t.Errorf("error evaluated result: expected %f, got %f.\n", tc.result, result)
+            if len(root.EquationTokens) != tc.tokens {
+                t.Errorf("error parsing equation: incorrect amount of equation tokens, expected %d, got %d.\n", tc.tokens, len(root.EquationTokens))
+            }
+
+            n := p.parseEquation(0)
+            val, _ := ast.Evaluate(n)
+            if val != tc.result {
+                t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
             }
         }
     })
