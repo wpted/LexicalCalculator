@@ -51,7 +51,21 @@ func New(value float32, isValue bool, operation string, isOperator bool, leftChi
 func Evaluate(equationNode *Node) (float32, error) {
     // Scenarios
     // 1. 6 ( One single integer )
-    // 2. 6 + 5 ( Binary Expression )
+    // 2. -6 ( Negative integer )
+    // 3. 6 + 5 ( Binary Expression )
+    // 4. nil node ( should be 0 )
+    // 5. 5 + 2 * 3 ( '*' operator has higher precedence than '+' )
+
+    // If node is neither an operator nor a value, it is 0.
+    // Consider ' + 5 '
+    // it's   +
+    //       / \
+    //     nil  5
+    // the value of the left child should be considered as 0.
+    if equationNode == nil {
+        return 0, nil
+    }
+
     if equationNode.IsValue {
         return equationNode.Value, nil
     }
@@ -75,11 +89,5 @@ func Evaluate(equationNode *Node) (float32, error) {
         }
     }
 
-    // If node is neither an operator nor a value, it is 0.
-    // Consider ' + 5 '
-    // it's   +
-    //       / \
-    //     nil  5
-    // the value of the left child should be considered as 0.
     return 0, nil
 }
