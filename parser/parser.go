@@ -129,8 +129,15 @@ func (p *Parser) parseEquation(minbp int) *ast.Node {
     // Left hand side. Calling nextEquationToken returns the currToken the pointer is pointing at then advances it.
     lhsTok := p.nextEquationToken()
 
-    lhsVal, _ := strconv.Atoi(lhsTok.Literal)
-    lhs := ast.New(lhsTok, lhsVal, true, "", false, nil, nil)
+    var lhs *ast.Node
+    if isInt(lhsTok) {
+        lhsVal, _ := strconv.Atoi(lhsTok.Literal)
+        lhs = ast.New(lhsTok, lhsVal, true, "", false, nil, nil)
+
+    } else if isOperator(lhsTok) {
+        rbp := prefixBindingPower(lhsTok)
+        lhs = ast.New(lhsTok, 0, false, lhsTok.Literal, true, nil, p.parseEquation(rbp))
+    }
 
     for {
         op := p.peekEquationToken()
@@ -174,8 +181,36 @@ func infixBindingPower(operatorToken *token.Token) (int, int) {
     return 0, 0
 }
 
+// infixBindingPower returns the left and right binding powers for different operators.
+func prefixBindingPower(operatorToken *token.Token) int {
+    switch operatorToken.LexicalType {
+    case token.PLUS:
+        return 5
+    case token.MINUS:
+        return 5
+    default:
+        return 0
+    }
+}
+
 // formBinaryTree creates a new ast.Node representing an operator and its operands.
 func formBinaryTree(op *token.Token, lhs *ast.Node, rhs *ast.Node) *ast.Node {
     operatorNode := ast.New(op, 0, false, op.Literal, true, lhs, rhs)
     return operatorNode
+}
+
+// operatorSet stores all operator type.
+var operatorSet = map[string]struct{}{
+    token.PLUS: {}, token.MINUS: {}, token.SLASH: {}, token.ASTERISK: {},
+}
+
+// isOperator checks whether a token is an operator.
+func isOperator(tok *token.Token) bool {
+    _, ok := operatorSet[tok.LexicalType]
+    return ok
+}
+
+// isInt checks whether a token is an integer.
+func isInt(tok *token.Token) bool {
+    return tok.LexicalType == token.INT
 }
