@@ -5,7 +5,6 @@ import (
     "LexicalCalculator/lexer"
     "LexicalCalculator/token"
     "errors"
-    "fmt"
     "testing"
 )
 
@@ -77,15 +76,17 @@ func TestParser_Parse(t *testing.T) {
             }
 
             if p.root.EquationTokens == nil {
-                t.Errorf("error parsing equation: expected non nil root")
+                t.Errorf("error parsing equation: expected non nil root.\n")
             }
 
             if len(p.root.EquationTokens) != tc.tokens {
                 t.Errorf("error parsing equation: incorrect amount of equation tokens, expected %d, got %d.\n", tc.tokens, len(p.root.EquationTokens))
             }
 
-            n := p.parseEquation(0)
-            fmt.Println(n.String())
+            n, err := p.parseEquation(0)
+            if err != nil {
+                t.Errorf("Error parsing equation: got error %s.\n", err.Error())
+            }
             val, err := ast.Evaluate(n)
             if err != nil {
                 if num != 12 {
