@@ -5,6 +5,7 @@ import (
     "LexicalCalculator/lexer"
     "LexicalCalculator/token"
     "errors"
+    "fmt"
     "testing"
 )
 
@@ -38,7 +39,9 @@ func TestParser_Parse(t *testing.T) {
             input  string
             tokens int
             result float32
+            err    error
         }{
+            // Binary operation.
             {input: "calc '1'", tokens: 1, result: 1},
             {input: "calc '1 + 2'", tokens: 3, result: 3},
             {input: "calc '2 - 1'", tokens: 3, result: 1},
@@ -47,9 +50,17 @@ func TestParser_Parse(t *testing.T) {
             {input: "calc '2 + 3 + 4'", tokens: 5, result: 9},
             {input: "calc '2 + 3 * 5'", tokens: 5, result: 17},
             {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
+            {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
+            // Unary operation.
+            {input: "calc '-1'", tokens: 2, result: -1},
+            {input: "calc '-1 + 2'", tokens: 4, result: 1},
+            {input: "calc '-1 + 2 * 5'", tokens: 6, result: 9},
+
+            // Zero division.
+            {input: "calc '1 / 0'", tokens: 3, err: ast.ErrZeroDivision},
         }
 
-        for _, tc := range testCases {
+        for num, tc := range testCases {
             p.Input(tc.input)
             err := p.Parse()
             if err != nil {
@@ -74,8 +85,19 @@ func TestParser_Parse(t *testing.T) {
             }
 
             n := p.parseEquation(0)
-            val, _ := ast.Evaluate(n)
-            if val != tc.result {
+            fmt.Println(n.String())
+            val, err := ast.Evaluate(n)
+            if err != nil {
+                if num != 12 {
+                    t.Errorf("error calculating: got error %s.\n", err.Error())
+                } else {
+                    if !errors.Is(err, ast.ErrZeroDivision) {
+                        t.Errorf("error incorrect error: expected error %s, got error %s.\n", ast.ErrZeroDivision, err.Error())
+                    }
+                }
+            }
+
+            if num != 12 && val != tc.result {
                 t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
             }
         }
