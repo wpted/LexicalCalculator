@@ -35,8 +35,8 @@ func TestParser_Parse(t *testing.T) {
         }
 
         for testNum, i := range testCases {
-            p.Input(i.input)
-            err := p.Parse()
+            p.input(i.input)
+            err := p.parsePrompt()
             if testNum < 5 && !errors.Is(err, i.error) {
                 t.Errorf("error parsing incorrect prompt: expected error %s, got error %s.\n", i.error, err)
             }
@@ -82,8 +82,8 @@ func TestParser_Parse(t *testing.T) {
         }
 
         for testNum, tc := range testCases {
-            p.Input(tc.input)
-            err := p.Parse()
+            p.input(tc.input)
+            err := p.parsePrompt()
             if err != nil {
                 t.Errorf("Error parsing calculator prompt, got error: %v.\n", err)
             }
