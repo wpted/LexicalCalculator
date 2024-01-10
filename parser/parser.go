@@ -125,7 +125,7 @@ func (p *Parser) peekEquationToken() *token.Token {
 }
 
 // parseEquation parses the equation stored in the Parser into an *ast.Node.
-func (p *Parser) parseEquation(minbp int) *ast.Node {
+func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
     // Left hand side. Calling nextEquationToken returns the currToken the pointer is pointing at then advances it.
     lhsTok := p.nextEquationToken()
 
@@ -136,7 +136,21 @@ func (p *Parser) parseEquation(minbp int) *ast.Node {
 
     } else if isOperator(lhsTok) {
         rbp := prefixBindingPower(lhsTok)
-        lhs = ast.New(lhsTok, 0, false, lhsTok.Literal, true, nil, p.parseEquation(rbp))
+        // Scenario: Unknown operator.
+        if rbp == 0 {
+            return nil, ErrEquation
+        }
+
+        // Scenario: Something wrong happened when parsing a deeper node, like '5 + 6 *'.
+        rightChild, err := p.parseEquation(rbp)
+        if err != nil {
+            return nil, err
+        }
+
+        lhs = ast.New(lhsTok, 0, false, lhsTok.Literal, true, nil, rightChild)
+    } else {
+        // Scenario: Missing an integer, like '' or '5 + '.
+        return nil, ErrEquation
     }
 
     for {
@@ -145,8 +159,19 @@ func (p *Parser) parseEquation(minbp int) *ast.Node {
             // If there is no more operators ( or following tokens ), break out of the loop.
             break
         }
+
+        // Scenario: Missing operator between integer tokens, like '5 25'.
+        if !isOperator(op) {
+            return nil, ErrEquation
+        }
+
         // Get the binding power for the current operator.
         lbp, rbp := infixBindingPower(op)
+        // Scenario: Unknown operator.
+        if lbp == 0 || rbp == 0 {
+            return nil, ErrEquation
+        }
+
         if lbp < minbp {
             // When left binding power is smaller than the minimum binding power
             // we have higher precedence before than the one we currently encounter, break.
@@ -157,13 +182,16 @@ func (p *Parser) parseEquation(minbp int) *ast.Node {
         p.nextEquationToken()
 
         // Fetch the right hand side node recursively.
-        rhs := p.parseEquation(rbp)
+        rhs, err := p.parseEquation(rbp)
+        if err != nil {
+            return nil, err
+        }
 
         // Updates lhs for the next iteration.
         lhs = formEquation(op, lhs, rhs)
     }
 
-    return lhs
+    return lhs, nil
 }
 
 // infixBindingPower returns the left and right binding powers for different operators.
@@ -200,17 +228,21 @@ func formEquation(op *token.Token, lhs *ast.Node, rhs *ast.Node) *ast.Node {
 }
 
 // operatorSet stores all operator type.
-var operatorSet = map[string]struct{}{
-    token.PLUS: {}, token.MINUS: {}, token.SLASH: {}, token.ASTERISK: {},
-}
+var operatorSet = map[string]struct{}{token.PLUS: {}, token.MINUS: {}, token.SLASH: {}, token.ASTERISK: {}}
 
 // isOperator checks whether a token is an operator.
 func isOperator(tok *token.Token) bool {
-    _, ok := operatorSet[tok.LexicalType]
-    return ok
+    if tok != nil {
+        _, ok := operatorSet[tok.LexicalType]
+        return ok
+    }
+    return false
 }
 
 // isInt checks whether a token is an integer.
 func isInt(tok *token.Token) bool {
-    return tok.LexicalType == token.INT
+    if tok != nil {
+        return tok.LexicalType == token.INT
+    }
+    return false
 }
