@@ -160,7 +160,7 @@ func (p *Parser) parseEquation(minbp int) *ast.Node {
         rhs := p.parseEquation(rbp)
 
         // Updates lhs for the next iteration.
-        lhs = formBinaryTree(op, lhs, rhs)
+        lhs = formEquation(op, lhs, rhs)
     }
 
     return lhs
@@ -193,8 +193,8 @@ func prefixBindingPower(operatorToken *token.Token) int {
     }
 }
 
-// formBinaryTree creates a new ast.Node representing an operator and its operands.
-func formBinaryTree(op *token.Token, lhs *ast.Node, rhs *ast.Node) *ast.Node {
+// formEquation creates a new ast.Node representing an operator and its operands.
+func formEquation(op *token.Token, lhs *ast.Node, rhs *ast.Node) *ast.Node {
     operatorNode := ast.New(op, 0, false, op.Literal, true, lhs, rhs)
     return operatorNode
 }
