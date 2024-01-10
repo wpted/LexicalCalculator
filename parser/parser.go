@@ -29,6 +29,20 @@ func New(l *lexer.Lexer) *Parser {
     return &Parser{l: l}
 }
 
+// Evaluate takes input and calculates the result.
+func (p *Parser) Evaluate(input string) (float32, error) {
+    p.input(input)
+    err := p.parsePrompt()
+    if err != nil {
+        return 0, err
+    }
+    n, err := p.parseEquation(0)
+    if err != nil {
+        return 0, err
+    }
+    return ast.Evaluate(n)
+}
+
 // input takes input data and send it to the lexer.
 // It frees the root and set the equationCursor to 0 before taking input.
 func (p *Parser) input(data string) {
