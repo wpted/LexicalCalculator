@@ -17,18 +17,36 @@ func TestParser_Parse(t *testing.T) {
             input string
             error error
         }{
+            // Error calculator prompt.
             {"", ErrPrompt},                  // missing the rest of the prompt.
             {"caldc '5 + 5'", ErrPrompt},     // misspelled calc.
             {"calc", ErrPrompt},              // missing the rest of the prompt.
             {"calc 5 + 5'", ErrOpeningQuote}, // missing first single quote.
             {"calc '5 + 5", ErrClosingQuote}, // missing closing single quote.
+
+            // Error equation.
+            {"calc ''", ErrEquation},
+            {"calc '5 5'", ErrEquation},
+            {"calc '5 +'", ErrEquation},
+
+            {"calc '*5'", ErrEquation},
+            {"calc '/5'", ErrEquation},
+            {"calc '-5 +'", ErrEquation},
         }
 
-        for _, i := range testCases {
+        for testNum, i := range testCases {
             p.Input(i.input)
             err := p.Parse()
-            if !errors.Is(err, i.error) {
-                t.Errorf("error parsing incorrect prompt: expected error %v, got error %v.\n", i.error, err)
+            if testNum < 5 && !errors.Is(err, i.error) {
+                t.Errorf("error parsing incorrect prompt: expected error %s, got error %s.\n", i.error, err)
+            }
+
+            // All equation error test cases are after testNum 5.
+            if testNum >= 5 {
+                _, err = p.parseEquation(0)
+                if !errors.Is(err, i.error) {
+                    t.Errorf("error parsing incorrect equation: expected error %s, got error %s.\n", i.error, err)
+                }
             }
         }
     })
@@ -50,16 +68,20 @@ func TestParser_Parse(t *testing.T) {
             {input: "calc '2 + 3 * 5'", tokens: 5, result: 17},
             {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
             {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
+
             // Unary operation.
             {input: "calc '-1'", tokens: 2, result: -1},
             {input: "calc '-1 + 2'", tokens: 4, result: 1},
             {input: "calc '-1 + 2 * 5'", tokens: 6, result: 9},
+            {input: "calc '--1'", tokens: 3, result: 1},
+            {input: "calc '++5'", tokens: 3, result: 5},
+            {input: "calc '5 + - 5'", tokens: 4, result: 0},
 
             // Zero division.
             {input: "calc '1 / 0'", tokens: 3, err: ast.ErrZeroDivision},
         }
 
-        for num, tc := range testCases {
+        for testNum, tc := range testCases {
             p.Input(tc.input)
             err := p.Parse()
             if err != nil {
@@ -85,20 +107,20 @@ func TestParser_Parse(t *testing.T) {
 
             n, err := p.parseEquation(0)
             if err != nil {
-                t.Errorf("Error parsing equation: got error %s.\n", err.Error())
+                t.Errorf("Error parsing equation: got error %s.\n", err)
             }
             val, err := ast.Evaluate(n)
             if err != nil {
-                if num != 12 {
-                    t.Errorf("error calculating: got error %s.\n", err.Error())
+                if testNum != len(testCases)-1 {
+                    t.Errorf("error calculating: got error %s.\n", err)
                 } else {
                     if !errors.Is(err, ast.ErrZeroDivision) {
-                        t.Errorf("error incorrect error: expected error %s, got error %s.\n", ast.ErrZeroDivision, err.Error())
+                        t.Errorf("error incorrect error: expected error %s, got error %s.\n", ast.ErrZeroDivision, err)
                     }
                 }
             }
 
-            if num != 12 && val != tc.result {
+            if testNum != len(testCases)-1 && val != tc.result {
                 t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
             }
         }
