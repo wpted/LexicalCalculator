@@ -29,18 +29,28 @@ func New(l *lexer.Lexer) *Parser {
     return &Parser{l: l}
 }
 
-// Input takes input data and send it to the lexer.
+// input takes input data and send it to the lexer.
 // It frees the root and set the equationCursor to 0 before taking input.
-func (p *Parser) Input(data string) {
+func (p *Parser) input(data string) {
     p.root = nil
     p.equationCursor = 0
     p.l.Input(data)
 }
 
-// Parse evaluates calculator prompt and tell whether it's valid.
+// peekToken gets a copy of the next token.
+func (p *Parser) peekToken() token.Token {
+    return *p.nextToken
+}
+
+// readNextToken returns the nextToken read from the parser.
+func (p *Parser) readNextToken() *token.Token {
+    return p.l.ReadNextToken()
+}
+
+// parsePrompt evaluates calculator prompt and tell whether it's valid.
 // If the given input is valid, the equation node is then stored for further evaluation.
-// If it isn't, Parse returns an empty root and an error.
-func (p *Parser) Parse() error {
+// If it isn't, parsePrompt returns an error.
+func (p *Parser) parsePrompt() error {
     p.root = new(ast.Root)
     p.root.EquationTokens = make([]*token.Token, 0)
     // Read the first token and check if it's started with 'calc'.
@@ -92,36 +102,6 @@ func (p *Parser) Parse() error {
     }
 
     return nil
-}
-
-// peekToken gets a copy of the next token.
-func (p *Parser) peekToken() token.Token {
-    return *p.nextToken
-}
-
-// readNextToken returns the nextToken read from the parser.
-func (p *Parser) readNextToken() *token.Token {
-    return p.l.ReadNextToken()
-}
-
-// nextEquationToken retrieves the next token from equationTokens list and advances the cursor.
-// If the cursor is at the end of the token list, it returns nil to indicate that there are no more tokens.
-func (p *Parser) nextEquationToken() *token.Token {
-    if p.equationCursor >= len(p.root.EquationTokens) {
-        return nil
-    }
-    tok := p.root.EquationTokens[p.equationCursor]
-    p.equationCursor++
-    return tok
-}
-
-// peekEquationToken retrieves the next token from equationTokens without advancing the cursor.
-// If the cursor is at the end of the token list, it returns nil to indicate that there are no more tokens.
-func (p *Parser) peekEquationToken() *token.Token {
-    if p.equationCursor >= len(p.root.EquationTokens) {
-        return nil
-    }
-    return p.root.EquationTokens[p.equationCursor]
 }
 
 // parseEquation parses the equation stored in the Parser into an *ast.Node.
@@ -194,6 +174,32 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
     return lhs, nil
 }
 
+// formEquation creates a new ast.Node representing an operator and its operands.
+func formEquation(op *token.Token, lhs *ast.Node, rhs *ast.Node) *ast.Node {
+    operatorNode := ast.New(op, 0, false, op.Literal, true, lhs, rhs)
+    return operatorNode
+}
+
+// nextEquationToken retrieves the next token from equationTokens list and advances the cursor.
+// If the cursor is at the end of the token list, it returns nil to indicate that there are no more tokens.
+func (p *Parser) nextEquationToken() *token.Token {
+    if p.equationCursor >= len(p.root.EquationTokens) {
+        return nil
+    }
+    tok := p.root.EquationTokens[p.equationCursor]
+    p.equationCursor++
+    return tok
+}
+
+// peekEquationToken retrieves the next token from equationTokens without advancing the cursor.
+// If the cursor is at the end of the token list, it returns nil to indicate that there are no more tokens.
+func (p *Parser) peekEquationToken() *token.Token {
+    if p.equationCursor >= len(p.root.EquationTokens) {
+        return nil
+    }
+    return p.root.EquationTokens[p.equationCursor]
+}
+
 // infixBindingPower returns the left and right binding powers for different operators.
 func infixBindingPower(operatorToken *token.Token) (int, int) {
     switch operatorToken.LexicalType {
@@ -219,12 +225,6 @@ func prefixBindingPower(operatorToken *token.Token) int {
     default:
         return 0
     }
-}
-
-// formEquation creates a new ast.Node representing an operator and its operands.
-func formEquation(op *token.Token, lhs *ast.Node, rhs *ast.Node) *ast.Node {
-    operatorNode := ast.New(op, 0, false, op.Literal, true, lhs, rhs)
-    return operatorNode
 }
 
 // operatorSet stores all operator type.
