@@ -26,7 +26,7 @@ func TestParser_Parse(t *testing.T) {
 
         for _, i := range testCases {
             p.Input(i.input)
-            _, err := p.Parse()
+            err := p.Parse()
             if !errors.Is(err, i.error) {
                 t.Errorf("error parsing incorrect prompt: expected error %v, got error %v.\n", i.error, err)
             }
@@ -39,6 +39,7 @@ func TestParser_Parse(t *testing.T) {
             tokens int
             result float32
         }{
+            {input: "calc '1'", tokens: 1, result: 1},
             {input: "calc '1 + 2'", tokens: 3, result: 3},
             {input: "calc '2 - 1'", tokens: 3, result: 1},
             {input: "calc '2 * 3'", tokens: 3, result: 6},
@@ -50,26 +51,26 @@ func TestParser_Parse(t *testing.T) {
 
         for _, tc := range testCases {
             p.Input(tc.input)
-            root, err := p.Parse()
+            err := p.Parse()
             if err != nil {
                 t.Errorf("Error parsing calculator prompt, got error: %v.\n", err)
             }
 
             // Check the first token, should be a calc token.
-            if root.Token.LexicalType != token.CALC {
-                t.Errorf("error root token type: expected %s, got %s.\n", token.CALC, root.Token.LexicalType)
+            if p.root.Token.LexicalType != token.CALC {
+                t.Errorf("error root token type: expected %s, got %s.\n", token.CALC, p.root.Token.LexicalType)
             }
 
-            if root.Token.Literal != "calc" {
-                t.Errorf("error root token literal: expected %s, got %s.\n", "calc", root.Token.Literal)
+            if p.root.Token.Literal != "calc" {
+                t.Errorf("error root token literal: expected %s, got %s.\n", "calc", p.root.Token.Literal)
             }
 
-            if root.EquationTokens == nil {
+            if p.root.EquationTokens == nil {
                 t.Errorf("error parsing equation: expected non nil root")
             }
 
-            if len(root.EquationTokens) != tc.tokens {
-                t.Errorf("error parsing equation: incorrect amount of equation tokens, expected %d, got %d.\n", tc.tokens, len(root.EquationTokens))
+            if len(p.root.EquationTokens) != tc.tokens {
+                t.Errorf("error parsing equation: incorrect amount of equation tokens, expected %d, got %d.\n", tc.tokens, len(p.root.EquationTokens))
             }
 
             n := p.parseEquation(0)
