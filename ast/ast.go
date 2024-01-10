@@ -3,16 +3,16 @@ package ast
 import (
     "LexicalCalculator/token"
     "errors"
+    "fmt"
 )
 
-// an equation like this
-// 5 + 2 * 3
-// should be represented as
+// An equation '5 + 2 * 3' should be represented as
 //       +
 //      / \
 //     5   *
 //        / \
 //       2   3
+// and have a string form of (+ 5 (* 2 3))
 
 var (
     ErrZeroDivision = errors.New("error cannot use 0 as denominator")
@@ -20,8 +20,8 @@ var (
 
 // Root should be the ast root of a calculator prompt.
 type Root struct {
-    Token    *token.Token
-    Equation *Node
+    Token          *token.Token
+    EquationTokens []*token.Token
 }
 
 // Node is the general structure of all expressions in the equation.
@@ -30,14 +30,27 @@ type Node struct {
     IsOperator bool
     Operator   string
     IsValue    bool
-    Value      float32
+    Value      int
     Left       *Node
     Right      *Node
 }
 
+// String returns the S-expression of a Node.
+// S-expression
+func (n *Node) String() string {
+    if n.Left == nil && n.Right == nil {
+        return fmt.Sprintf("%d", n.Value)
+    } else if n.Left == nil && n.Right != nil {
+        return fmt.Sprintf("(%s %s %s)", n.Operator, "0", n.Right.String())
+    } else {
+        return fmt.Sprintf("(%s %s %s)", n.Operator, n.Left.String(), n.Right.String())
+    }
+}
+
 // New creates a new Node.
-func New(value float32, isValue bool, operation string, isOperator bool, leftChild *Node, rightNode *Node) *Node {
+func New(tok *token.Token, value int, isValue bool, operation string, isOperator bool, leftChild *Node, rightNode *Node) *Node {
     return &Node{
+        Token:      tok,
         IsOperator: isOperator,
         Operator:   operation,
         IsValue:    isValue,
@@ -67,7 +80,7 @@ func Evaluate(equationNode *Node) (float32, error) {
     }
 
     if equationNode.IsValue {
-        return equationNode.Value, nil
+        return float32(equationNode.Value), nil
     }
 
     if equationNode.IsOperator {
