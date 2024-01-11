@@ -6,6 +6,7 @@ import (
     "bufio"
     "fmt"
     "os"
+    "strings"
 )
 
 const (
@@ -23,15 +24,15 @@ func main() {
     // Should have prefix calculation like `calc "-5 + 4"`
     // Should handle error like zero-divisions.
     // Create CLI environment(repl), takes commands; ['calc', 'end'].
-    fmt.Println("Start calculator.")
+    fmt.Println("Calculator started.")
     fmt.Println(">>>>")
     scanner := bufio.NewScanner(os.Stdin)
     for {
-        fmt.Print(REPL)
+        fmt.Printf("%sInsert your prompt: ", REPL)
         scanner.Scan()
         cmd := scanner.Text()
 
-        switch cmd {
+        switch strings.ToLower(cmd) {
         case QUIT:
             return
         default:
