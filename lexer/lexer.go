@@ -77,6 +77,18 @@ func (l *Lexer) ReadNextToken() *token.Token {
         return tok
     case "'":
         tok = token.New(token.SINGLEQUOTE, string(next))
+    case "(":
+        tok = token.New(token.LPAREN, string(next))
+    case ")":
+        tok = token.New(token.RPAREN, string(next))
+    case "[":
+        tok = token.New(token.LSQBRACK, string(next))
+    case "]":
+        tok = token.New(token.RSQBRACK, string(next))
+    case "{":
+        tok = token.New(token.LCURBRACK, string(next))
+    case "}":
+        tok = token.New(token.RCURBRACK, string(next))
     case "+":
         tok = token.New(token.PLUS, string(next))
     case "-":
