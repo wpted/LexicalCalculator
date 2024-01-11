@@ -3,7 +3,9 @@ package token
 const (
     CALC = "CALC"
 
-    SINGLEQUOTE = "SINGLEQUOTE"
+    SINGLEQUOTE = "'"
+    LEFTBRACE   = "("
+    RIGHTBRACE  = ")"
 
     INT = "INT"
 
