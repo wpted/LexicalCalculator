@@ -12,6 +12,7 @@ import (
 const (
     REPL = ">> "
     QUIT = "quit"
+    HELP = "help"
 )
 
 func main() {
@@ -25,7 +26,9 @@ func main() {
     // Should handle error like zero-divisions.
     // Create CLI environment(repl), takes commands; ['calc', 'end'].
     fmt.Println("Calculator started.")
-    fmt.Println(">>>>")
+    fmt.Println(">>>> Input your calculator prompt in format: calc '<your equation here>'")
+
+    fmt.Println(">>>> Or type help to see instructions.")
     scanner := bufio.NewScanner(os.Stdin)
     for {
         fmt.Printf("%sInsert your prompt: ", REPL)
@@ -33,7 +36,14 @@ func main() {
         cmd := scanner.Text()
 
         switch strings.ToLower(cmd) {
+        case HELP:
+            fmt.Println("Input prompts")
+            fmt.Println("    - calc '<equation>'")
+            fmt.Println("    - quit")
+            fmt.Println("    - help")
+
         case QUIT:
+            fmt.Println("Exit Calculator.")
             return
         default:
             calculatedResult, err := p.Evaluate(cmd)
