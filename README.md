@@ -34,9 +34,14 @@ To build the AST, I selected Pratt Parsing and S-Expression instead of using the
 
 Run the program.
 
-On Linux.
+Run the corresponding executable on different platforms.
+
 ```shell
+  # On Linux
   ./calculator
+  
+  # On Windows
+  calculator.exe
 ```
 
 After starting the program you'll see:
