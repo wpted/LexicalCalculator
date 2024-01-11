@@ -4,8 +4,12 @@ const (
     CALC = "CALC"
 
     SINGLEQUOTE = "'"
-    LEFTBRACE   = "("
-    RIGHTBRACE  = ")"
+    LPAREN      = "("
+    RPAREN      = ")"
+    LSQBRACK    = "["
+    RSQBRACK    = "]"
+    LCURBRACK   = "{"
+    RCURBRACK   = "}"
 
     INT = "INT"
 
