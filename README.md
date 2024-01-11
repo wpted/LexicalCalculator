@@ -27,14 +27,16 @@ and return the result.
 
 1. Create a lexer that tokenizes the input.
 2. Create a parser that parses the tokens, and turns it into an AST.
+To build the AST, I selected Pratt Parsing and S-Expression instead of using the Shunting Yard algorithm and stacks. 
 3. Evaluate the AST and output the calculated results.
 
 ## Current Feature
 
 Run the program.
 
+On Linux.
 ```shell
-  go run main.go
+  ./calculator
 ```
 
 After starting the program you'll see:
@@ -143,11 +145,14 @@ The result is rounded to 2 decimal places.
     
 
 ## References
-
-- Tools:
-    - [AST Explorer](https://astexplorer.net)
-- Video:
-    - [Swift 3 Fun Algorithms: Abstract Syntax Tree](https://www.youtube.com/watch?v=r14Vtwi2k7s)
-- Reads:
-    - [S-expression according to Wikipedia](https://en.wikipedia.org/wiki/S-expression)
-    - [Simple but Powerful Pratt Parsing](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html#From-Precedence-to-Binding-Power)
+## Tools:
+- [AST Explorer](https://astexplorer.net)
+## Video:
+- [Swift 3 Fun Algorithms: Abstract Syntax Tree](https://www.youtube.com/watch?v=r14Vtwi2k7s)
+## Reads:
+- [Wikipedia: Shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm#The_algorithm_in_detail) 
+- [Wikipedia: S-expression](https://en.wikipedia.org/wiki/S-expression)
+- [Simple but Powerful Pratt Parsing](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html#From-Precedence-to-Binding-Power)
+- [How Desmos uses Pratt Parsers](https://engineering.desmos.com/articles/pratt-parser/)
+- [Pratt Parsers: Expression Parsing Made Easy](https://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/)
+- [Arrow functions break JavaScript parsers](https://dev.to/samthor/arrow-functions-break-javascript-parsers-1ldp)
