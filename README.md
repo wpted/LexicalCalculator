@@ -161,3 +161,4 @@ The result is rounded to 2 decimal places.
 - [How Desmos uses Pratt Parsers](https://engineering.desmos.com/articles/pratt-parser/)
 - [Pratt Parsers: Expression Parsing Made Easy](https://journal.stuffwithstuff.com/2011/03/19/pratt-parsers-expression-parsing-made-easy/)
 - [Arrow functions break JavaScript parsers](https://dev.to/samthor/arrow-functions-break-javascript-parsers-1ldp)
+- [手寫一個Parser - 代碼簡單而功能強大的Pratt Parsing](https://zhuanlan.zhihu.com/p/471075848)
