@@ -9,10 +9,11 @@ import (
 )
 
 var (
-    ErrPrompt       = errors.New("error incorrect prompt")
-    ErrOpeningQuote = errors.New("error missing prompt opening quote")
-    ErrClosingQuote = errors.New("error missing prompt closing quote")
-    ErrEquation     = errors.New("error equation format")
+    ErrPrompt                = errors.New("error incorrect prompt")
+    ErrOpeningQuote          = errors.New("error missing prompt opening quote")
+    ErrClosingQuote          = errors.New("error missing prompt closing quote")
+    ErrEquation              = errors.New("error equation format")
+    ErrMissingClosingBracket = errors.New("error missing closing bracket")
 )
 
 // Parser reads token from the lexer.
@@ -124,11 +125,12 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
     lhsTok := p.nextEquationToken()
 
     var lhs *ast.Node
-    if isInt(lhsTok) {
+    switch {
+    case isInt(lhsTok):
         lhsVal, _ := strconv.Atoi(lhsTok.Literal)
         lhs = ast.New(lhsTok, lhsVal, true, "", false, nil, nil)
 
-    } else if isOperator(lhsTok) {
+    case isOperator(lhsTok) && lhs == nil:
         rbp := prefixBindingPower(lhsTok)
         // Scenario: Unknown operator.
         if rbp == 0 {
@@ -142,15 +144,27 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
         }
 
         lhs = ast.New(lhsTok, 0, false, lhsTok.Literal, true, nil, rightChild)
-    } else {
+
+    case isBracket(lhsTok):
+        lhs, _ = p.parseEquation(0)
+        if p.peekEquationToken() == nil {
+            return nil, ErrMissingClosingBracket
+        } else if p.peekEquationToken().LexicalType != correspondingBracket[lhsTok.LexicalType] {
+            return nil, ErrMissingClosingBracket
+        } else {
+            // Consume the correct right parenthesis.
+            p.nextEquationToken()
+        }
+
+    default:
         // Scenario: Missing an integer, like '' or '5 + '.
         return nil, ErrEquation
     }
 
     for {
         op := p.peekEquationToken()
-        if op == nil {
-            // If there is no more operators ( or following tokens ), break out of the loop.
+        if op == nil || op.LexicalType == token.RPAREN || op.LexicalType == token.RSQBRACK || op.LexicalType == token.RCURBRACK {
+            // If there is no more operators in equation ( or following tokens ), break out of the loop.
             break
         }
 
@@ -184,7 +198,6 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
         // Updates lhs for the next iteration.
         lhs = formEquation(op, lhs, rhs)
     }
-
     return lhs, nil
 }
 
@@ -259,4 +272,21 @@ func isInt(tok *token.Token) bool {
         return tok.LexicalType == token.INT
     }
     return false
+}
+
+// correspondingBracket is the bracket relationship.
+var correspondingBracket = map[string]string{
+    token.LPAREN:    token.RPAREN,
+    token.LSQBRACK:  token.LSQBRACK,
+    token.LCURBRACK: token.RCURBRACK,
+}
+
+// isBracket checks whether a token is a bracket.
+func isBracket(tok *token.Token) bool {
+    if tok == nil {
+        return false
+    }
+
+    _, ok := correspondingBracket[tok.LexicalType]
+    return ok
 }
