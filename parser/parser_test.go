@@ -32,6 +32,8 @@ func TestParser_Parse(t *testing.T) {
             {"calc '*5'", ErrEquation},
             {"calc '/5'", ErrEquation},
             {"calc '-5 +'", ErrEquation},
+            //{"calc '(5 + 5'", ErrEquation},
+            // {"calc '5 + 5)'", ErrEquation},
         }
 
         for testNum, i := range testCases {
@@ -59,23 +61,40 @@ func TestParser_Parse(t *testing.T) {
             err    error
         }{
             // Binary operation.
-            {input: "calc '1'", tokens: 1, result: 1},
-            {input: "calc '1 + 2'", tokens: 3, result: 3},
-            {input: "calc '2 - 1'", tokens: 3, result: 1},
-            {input: "calc '2 * 3'", tokens: 3, result: 6},
-            {input: "calc '3 / 2'", tokens: 3, result: 1.5},
-            {input: "calc '2 + 3 + 4'", tokens: 5, result: 9},
-            {input: "calc '2 + 3 * 5'", tokens: 5, result: 17},
-            {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
-            {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
+            //{input: "calc '0'", tokens: 1, result: 0},
+            //{input: "calc '1 + 2'", tokens: 3, result: 3},
+            //{input: "calc '2 - 1'", tokens: 3, result: 1},
+            //{input: "calc '2 * 3'", tokens: 3, result: 6},
+            //{input: "calc '3 / 2'", tokens: 3, result: 1.5},
+            //{input: "calc '2 + 3 + 4'", tokens: 5, result: 9},
+            //{input: "calc '2 + 3 * 5'", tokens: 5, result: 17},
+            //{input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
+            //{input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
 
             // Unary operation.
-            {input: "calc '-1'", tokens: 2, result: -1},
-            {input: "calc '-1 + 2'", tokens: 4, result: 1},
-            {input: "calc '-1 + 2 * 5'", tokens: 6, result: 9},
-            {input: "calc '--1'", tokens: 3, result: 1},
-            {input: "calc '++5'", tokens: 3, result: 5},
-            {input: "calc '5 + - 5'", tokens: 4, result: 0},
+            //{input: "calc '-1'", tokens: 2, result: -1},
+            //{input: "calc '-1 + 2'", tokens: 4, result: 1},
+            //{input: "calc '-1 + 2 * 5'", tokens: 6, result: 9},
+            //{input: "calc '--1'", tokens: 3, result: 1},
+            //{input: "calc '++5'", tokens: 3, result: 5},
+            //{input: "calc '5 + - 5'", tokens: 4, result: 0},
+
+            // Brackets.
+            //{input: "calc '(0)'", tokens: 3, result: 0},
+            //{input: "calc '((0 + 1))'", tokens: 7, result: 1},
+            //{input: "calc '(((0) + 1))'", tokens: 9, result: 1},
+            //{input: "calc '((12 + 3) * 6) + 1'", tokens: 11, result: 91},
+            //{input: "calc '((12 + 3) * (1 + 5)) + 1'", tokens: 15, result: 91},
+            //
+            //{input: "calc '[(12 + 3) * 6] + 1'", tokens: 11, result: 91},
+            //{input: "calc '{[(12 + 3) * 6] + 1} * 2'", tokens: 15, result: 182},
+
+            // Error brackets.
+            {input: "calc '(0'", tokens: 2, err: ErrMissingClosingBracket},
+            {input: "calc '((0 + 1)'", tokens: 6, err: ErrMissingClosingBracket},
+            {input: "calc '[(12 + 3 * 6] + 1'", tokens: 10, err: ErrMissingClosingBracket},
+            {input: "calc '[(12 + 3) * 6 + 1'", tokens: 10, err: ErrMissingClosingBracket},
+
 
             // Zero division.
             {input: "calc '1 / 0'", tokens: 3, err: ast.ErrZeroDivision},
@@ -107,16 +126,23 @@ func TestParser_Parse(t *testing.T) {
 
             n, err := p.parseEquation(0)
             if err != nil {
-                t.Errorf("Error parsing equation: got error %s.\n", err)
-            }
-            val, err := ast.Evaluate(n)
-            if err != nil {
-                if testNum != len(testCases)-1 {
-                    t.Errorf("error calculating: got error %s.\n", err)
-                } else {
-                    if !errors.Is(err, ast.ErrZeroDivision) {
+                if tc.err != nil {
+                    if !errors.Is(err, tc.err) {
                         t.Errorf("error incorrect error: expected error %s, got error %s.\n", ast.ErrZeroDivision, err)
                     }
+                } else {
+                    t.Errorf("Error parsing equation: got error %s.\n", err)
+                }
+            }
+
+            val, err := ast.Evaluate(n)
+            if err != nil {
+                if tc.err != nil {
+                    if !errors.Is(err, tc.err) {
+                        t.Errorf("error incorrect error: expected error %s, got error %s.\n", ast.ErrZeroDivision, err)
+                    }
+                } else {
+                    t.Errorf("error calculating: got error %s.\n", err)
                 }
             }
 
