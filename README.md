@@ -32,17 +32,32 @@ To build the AST, I selected Pratt Parsing and S-Expression instead of using the
 
 ## Current Feature
 
-Run the program.
+Git pull the repo and run the program.
+```shell
+   go run main.go
+```
 
-Run the corresponding executable on different platforms.
+or compile it first then run the corresponding executable on different platforms.
+```shell
+  # On Linux or MacOS
+  go build -o calculator
+  ./calculator
+  
+  # On Windows
+  env GOOS=windows GOARCH=amd64 go build -o calculator.exe
+  calculator.exe
+```
 
+You can also run the existing binaries from the repo.
 ```shell
   # On Linux
+  
   ./calculator
   
   # On Windows
   calculator.exe
 ```
+
 
 After starting the program you'll see:
 
@@ -96,17 +111,17 @@ The result is rounded to 2 decimal places.
 
 ## TODOs
 
-1. Float supports
+- [ ] Float supports
     ```go
         calc '2.1 * 3.5'
     ```
    
-2. Implement brackets: ( )[ ]{ }.
+- [x] Implement brackets: ( )[ ]{ }.
     ```go
         calc '{[(1 + 2) * 3] * [(100 / 20) + 8]} - 123'
     ```
    
-3. Power with integers, sin, cos, tan.
+- [ ] Power with integers, sin, cos, tan.
     ```go
         // Power with integers
         calc '2 ^ 3'
@@ -119,7 +134,7 @@ The result is rounded to 2 decimal places.
         calc 'tan(37)' // result: 0.75
     ```
    
-4. Store previous result in **ans**.
+- [  ] Store previous result in **ans**.
     ```go
         // First prompt
         calc '1 + 2'        // result: 3.00
@@ -130,7 +145,7 @@ The result is rounded to 2 decimal places.
         // use 'ans' to called stored results
         calc 'ans * 12'     // result: 36.00 
     ```
-5. Clear (AC button).
+- [ ] Clear (AC button).
     ```go
         // First prompt
         calc '1 + 2'        // result: 3.00
