@@ -22,6 +22,7 @@ type Parser struct {
     currToken      *token.Token
     nextToken      *token.Token
     equationCursor int
+    Result         float32
 }
 
 // New creates a new instance of a Parser.
@@ -40,7 +41,9 @@ func (p *Parser) Evaluate(input string) (float32, error) {
     if err != nil {
         return 0, err
     }
-    return ast.Evaluate(n)
+    result, err := ast.Evaluate(n)
+    p.Result = result
+    return result, err
 }
 
 // input takes input data and send it to the lexer.
