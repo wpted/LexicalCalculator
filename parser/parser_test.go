@@ -83,6 +83,7 @@ func TestParser_Parse(t *testing.T) {
             err    error
         }{
             // Binary operation.
+            {input: "calc 'ans'", tokens: 1, result: 0},
             {input: "calc '0'", tokens: 1, result: 0},
             {input: "calc '1 + 2'", tokens: 3, result: 3},
             {input: "calc '2 - 1'", tokens: 3, result: 1},
@@ -98,6 +99,7 @@ func TestParser_Parse(t *testing.T) {
             {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
 
             // Unary operation.
+            {input: "calc '-ans'", tokens: 2, result: -7}, // The answer here should inherit the previous test result.
             {input: "calc '-1'", tokens: 2, result: -1},
             {input: "calc '-1 + 2'", tokens: 4, result: 1},
             {input: "calc '-1 + 2 * 5'", tokens: 6, result: 9},
@@ -116,6 +118,7 @@ func TestParser_Parse(t *testing.T) {
 
             {input: "calc '[(12 + 3) * 6] + 1'", tokens: 11, result: 91},
             {input: "calc '[(1 + 2) * 3] * 4'", tokens: 11, result: 36},
+            {input: "calc '[(ans + 8) * 2] / 8'", tokens: 11, result: 11},
 
             {input: "calc '{[(12 + 3) * 6] + 1} * 2'", tokens: 15, result: 182},
             {input: "calc '{[(1 + 2) * 3] + 4} * 5'", tokens: 15, result: 65},
@@ -160,7 +163,7 @@ func TestParser_Parse(t *testing.T) {
                 if err != nil {
                     t.Errorf("error calculating: got error %s.\n", err)
                 }
-
+                p.result = val
                 if val != tc.result {
                     t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
                 }
