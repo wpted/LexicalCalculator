@@ -1,9 +1,8 @@
 package token
 
 const (
-    CALC  = "CALC"
-    ANS   = "ANS"
-    CLEAR = "CLEAR"
+    CALC = "CALC"
+    ANS  = "ANS"
 
     SINGLEQUOTE = "'"
     LPAREN      = "("
