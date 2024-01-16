@@ -5,8 +5,17 @@ import (
     "LexicalCalculator/lexer"
     "LexicalCalculator/token"
     "errors"
+    "math"
     "testing"
 )
+
+func almostEqual(a, b float64, epsilon float64) bool {
+    if a == b {
+        return true
+    }
+    diff := math.Abs(a - b)
+    return diff < epsilon
+}
 
 func TestParser_Parse(t *testing.T) {
     l := lexer.New()
@@ -86,8 +95,8 @@ func TestParser_Parse(t *testing.T) {
             {input: "calc 'ans'", tokens: 1, result: 0},
             {input: "calc '0'", tokens: 1, result: 0},
             {input: "calc '1 + 2'", tokens: 3, result: 3},
-            {input: "calc '2 - 1'", tokens: 3, result: 1},
-            {input: "calc '2 * 3'", tokens: 3, result: 6},
+            {input: "calc '2.1 - 1'", tokens: 3, result: 1.1},
+            {input: "calc '2.2 * 3'", tokens: 3, result: 6.6},
             {input: "calc '3 / 2'", tokens: 3, result: 1.5},
             {input: "calc '2 + 3 + 4'", tokens: 5, result: 9},
 
@@ -112,7 +121,7 @@ func TestParser_Parse(t *testing.T) {
             {input: "calc '((0 + 1))'", tokens: 7, result: 1},
             {input: "calc '(1 + 2) * 3'", tokens: 7, result: 9},
             {input: "calc '(((0) + 1))'", tokens: 9, result: 1},
-            {input: "calc '((12 + 3) * 6) + 1'", tokens: 11, result: 91},
+            {input: "calc '((2.1 + 3.7) * 4.425) * 6'", tokens: 11, result: 153.99},
             {input: "calc '(((1 + 2) * 3) + 4) * 5'", tokens: 15, result: 65},
             {input: "calc '((12 + 3) * (1 + 5)) + 1'", tokens: 15, result: 91},
 
@@ -164,7 +173,8 @@ func TestParser_Parse(t *testing.T) {
                     t.Errorf("error calculating: got error %s.\n", err)
                 }
                 p.result = val
-                if val != tc.result {
+                // Setting epsilon as accuracy.
+                if !almostEqual(float64(val), float64(tc.result), 0.0001) {
                     t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
                 }
             }
