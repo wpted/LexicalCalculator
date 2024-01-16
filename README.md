@@ -80,7 +80,7 @@ There is two type of prompt:
 This is the general input format the calculator will take:
 
 ```go
-   // 1. Calculator prompt, white space ignored, case insensitive.
+   // 1. Calculator prompt, white space ignored, case-insensitive.
    calc '5 + 2 * 3'
 ```
 
@@ -92,34 +92,38 @@ To quit the calculator:
 ```
 
 ### Features
+- [x] Float supports
+    ```go
+        calc '2.1 * 3.5'
+    ```
 
 - [x] Four simple expressions:
 
   ```go
-    calc '1 + 2' // result: 3.00
-    calc '2 - 1' // result: 1.00
-    calc '2 * 3' // result: 6.00
-    calc '3 / 2' // result: 1.50
+    calc '1 + 2' // result: 3.0000
+    calc '2 - 1' // result: 1.0000
+    calc '2 * 3' // result: 6.0000
+    calc '3 / 2' // result: 1.5000
   ```
 
 - [x] Mixed operations:
 
   ```go
-    calc '1 + 2 * 3'     // result: 7.00
-    calc '3 * 7 + 5 * 4' // result: 41.00
+    calc '1 + 2 * 3'     // result: 7.0000
+    calc '3 * 7 + 5 * 4' // result: 41.0000
   ```
 
-  The result is rounded to 2 decimal places.
+  The result is rounded to 4 decimal places.
 
 - [x] Brackets:
   ```go
-    calc '(1 + 2) * 3'                              // result: 9.00
-    calc '[(1 + 2) * 3] * 4'                        // result: 36.00
-    calc '{[(1 + 2) * 3] + 4} * 5'                  // result: 65.00
-    calc '{[(1 + 2) * 3] * [(100 / 20) + 8]} - 123' // result: -6.00
+    calc '(1 + 2) * 3'                              // result: 9.0000
+    calc '[(1 + 2) * 3] * 4'                        // result: 36.0000
+    calc '{[(1 + 2) * 3] + 4} * 5'                  // result: 65.0000
+    calc '{[(1 + 2) * 3] * [(100 / 20) + 8]} - 123' // result: -6.0000
 
     // Also supports equations with all parenthesis.
-    calc '(((1 + 2) * 3) + 4) * 5'                  // result: 65.00
+    calc '(((1 + 2) * 3) + 4) * 5'                  // result: 65.0000
   ```
 
   Bracket expressions like below should cause error
@@ -137,38 +141,34 @@ To quit the calculator:
 - [x] Store previous result in **ans**.
     ```go
         // First prompt
-        calc '1 + 2'        // result: 3.00
+        calc '1 + 2'        // result: 3.0000
         
         // The current 'ans' is 36.00
-        calc 'ans'          // result: 36.00
+        calc 'ans'          // result: 36.0000
             
         // use 'ans' to called stored results
-        calc 'ans * 12'     // result: 36.00 
+        calc 'ans * 12'     // result: 36.0000
     ```
 - [x] Clear (AC button).
     ```go
         // First prompt
-        calc '1 + 2'        // result: 3.00
+        calc '1 + 2'        // result: 3.0000
    
         // use 'ans' to called stored results
-        calc 'ans * 12'     // result: 36.00
+        calc 'ans * 12'     // result: 36.0000
    
         // The current ans is 36.00
-        calc 'ans'          // result: 36.00
+        calc 'ans'          // result: 36.0000
    
         // Clear 'ans'
         clear
    
-        // The current ans is 0.00
-        calc 'ans'          // result: 0.00 
+        // The current 'ans' is 0.0000
+        calc 'ans'          // result: 0.0000 
     ```
 
 ## TODOs
 
-- [ ] Float supports
-    ```go
-        calc '2.1 * 3.5'
-    ```
 
 - [ ] Power with integers, sin, cos, tan.
     ```go
