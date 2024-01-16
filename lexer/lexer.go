@@ -235,10 +235,12 @@ func isLetter(ch byte) bool {
     return false
 }
 
+// isLetter determines whether an input character is a decimal point.
 func isDecimalSeparator(ch byte) bool {
     return ch == 46
 }
 
+// isWhiteSpace determines whether an input character is a white space.
 func isWhiteSpace(ch byte) bool {
     whiteSpaces := map[string]struct{}{" ": {}, "\n": {}, "\t": {}, "\r": {}}
     _, ok := whiteSpaces[string(ch)]
