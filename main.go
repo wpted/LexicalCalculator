@@ -43,7 +43,7 @@ func main() {
             fmt.Println("    - quit")
             fmt.Println("    - help")
         case CLEAR:
-            p.Result = 0
+            p.ClearPreviousAns()
             continue
         case QUIT:
             fmt.Println("Exit Calculator.")
