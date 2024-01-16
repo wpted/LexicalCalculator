@@ -68,9 +68,10 @@ func TestLexer_ReadNextToken(t *testing.T) {
             },
         },
         {
-            input: "calc hello",
+            input: "calc ans hello",
             result: []token.Token{
                 {Literal: "calc", LexicalType: token.CALC},
+                {Literal: "ans", LexicalType: token.ANS},
                 {Literal: "hello", LexicalType: token.UNKNOWN},
                 {Literal: token.EOF, LexicalType: token.EOF},
             },
@@ -119,6 +120,18 @@ func TestLexer_ReadNextToken(t *testing.T) {
                 {Literal: "4", LexicalType: token.INT},
                 {Literal: "-", LexicalType: token.MINUS},
                 {Literal: "2", LexicalType: token.INT},
+                {Literal: "'", LexicalType: token.SINGLEQUOTE},
+                {Literal: "EOF", LexicalType: token.EOF},
+            },
+        },
+        {
+            input: "calc '2.1 + 3.5'",
+            result: []token.Token{
+                {Literal: "calc", LexicalType: token.CALC},
+                {Literal: "'", LexicalType: token.SINGLEQUOTE},
+                {Literal: "2.1", LexicalType: token.FLOAT},
+                {Literal: "+", LexicalType: token.MINUS},
+                {Literal: "3.5", LexicalType: token.FLOAT},
                 {Literal: "'", LexicalType: token.SINGLEQUOTE},
                 {Literal: "EOF", LexicalType: token.EOF},
             },
