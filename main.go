@@ -54,8 +54,8 @@ func main() {
                 fmt.Printf("%sIncorrect prompt: %s\n", REPL, cmd)
                 continue
             }
-            // Round the result to 2 decimal places
-            fmt.Printf(">> result: %.2f\n", calculatedResult)
+            // Round the result to 4 decimal places
+            fmt.Printf(">> result: %.4f\n", calculatedResult)
         }
     }
 }
