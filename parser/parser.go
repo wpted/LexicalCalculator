@@ -139,6 +139,9 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
     case isInt(lhsTok):
         lhsVal, _ := strconv.Atoi(lhsTok.Literal)
         lhs = ast.New(lhsTok, float32(lhsVal), true, "", false, nil, nil)
+    case isFloat(lhsTok):
+        lhsVal, _ := strconv.ParseFloat(lhsTok.Literal, 32)
+        lhs = ast.New(lhsTok, float32(lhsVal), true, "", false, nil, nil)
 
     case isOperator(lhsTok):
         rbp := prefixBindingPower(lhsTok)
@@ -178,6 +181,7 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
 
     default:
         // Scenario: Missing an integer, like '' or '5 + '.
+        // Or if the token we encounter is an unknown type.
         return nil, ErrEquation
     }
 
@@ -282,7 +286,10 @@ func prefixBindingPower(operatorToken *token.Token) int {
 
 // isAns checks whether a token is an 'ans' token.
 func isAns(tok *token.Token) bool {
-    return tok.LexicalType == token.ANS
+    if tok != nil {
+        return tok.LexicalType == token.ANS
+    }
+    return false
 }
 
 // operatorSet stores all operator type.
@@ -301,6 +308,14 @@ func isOperator(tok *token.Token) bool {
 func isInt(tok *token.Token) bool {
     if tok != nil {
         return tok.LexicalType == token.INT
+    }
+    return false
+}
+
+// isFloat checks whether a token is a float.
+func isFloat(tok *token.Token) bool {
+    if tok != nil {
+        return tok.LexicalType == token.FLOAT
     }
     return false
 }
