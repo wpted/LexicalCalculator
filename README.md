@@ -30,7 +30,7 @@ and return the result.
 To build the AST, I selected Pratt Parsing and S-Expression instead of using the Shunting Yard algorithm and stacks. 
 3. Evaluate the AST and output the calculated results.
 
-## Current Feature
+## Program
 
 Git pull the repo and run the program.
 ```shell
@@ -89,36 +89,54 @@ To quit the calculator:
   quit  
 ```
 
-### Supports
+### Features
 
-The calculator currently supports four simple expressions:
+- [x] Four simple expressions:
 
-```go
+  ```go
     calc '1 + 2' // result: 3.00
     calc '2 - 1' // result: 1.00
     calc '2 * 3' // result: 6.00
     calc '3 / 2' // result: 1.50
-```
+  ```
 
-and mixed operations like:
+- [x] Mixed operations:
 
-```go
+  ```go
     calc '1 + 2 * 3'     // result: 7.00
     calc '3 * 7 + 5 * 4' // result: 41.00
-```
+  ```
 
-The result is rounded to 2 decimal places.
+  The result is rounded to 2 decimal places.
+
+- [x] Brackets:
+  ```go
+    calc '(1 + 2) * 3'                              // result: 9.00
+    calc '[(1 + 2) * 3] * 4'                        // result: 36.00
+    calc '{[(1 + 2) * 3] + 4} * 5'                  // result: 65.00
+    calc '{[(1 + 2) * 3] * [(100 / 20) + 8]} - 123' // result: -6.00
+
+    // Also supports equations with all parenthesis.
+    calc '(((1 + 2) * 3) + 4) * 5'                  // result: 65.00
+  ```
+
+  Bracket expressions like below should cause error 
+  ```go
+    calc '(1 + 2 * 3'
+    calc '1 + 2) * 3'
+
+    calc '[(1 + 2 * 3] * 4'
+    calc '[1 + 2) * 3] * 4'
+    calc '[(1 + 2) * 3 * 4'
+
+    calc '{1 + 2) * 3] + 4} * 5'
+  ```
 
 ## TODOs
 
 - [ ] Float supports
     ```go
         calc '2.1 * 3.5'
-    ```
-   
-- [x] Implement brackets: ( )[ ]{ }.
-    ```go
-        calc '{[(1 + 2) * 3] * [(100 / 20) + 8]} - 123'
     ```
    
 - [ ] Power with integers, sin, cos, tan.
@@ -134,7 +152,7 @@ The result is rounded to 2 decimal places.
         calc 'tan(37)' // result: 0.75
     ```
    
-- [  ] Store previous result in **ans**.
+- [ ] Store previous result in **ans**.
     ```go
         // First prompt
         calc '1 + 2'        // result: 3.00
