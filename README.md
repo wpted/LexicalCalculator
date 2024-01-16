@@ -18,7 +18,7 @@ Parsing is the process by which a compiler turns a sequence of tokens into a tre
 We are to take prompts like:
 
 ```go
-  calc '1 + 2 * 3'
+calc '1 + 2 * 3'
 ```
 
 and return the result.
@@ -27,17 +27,19 @@ and return the result.
 
 1. Create a lexer that tokenizes the input.
 2. Create a parser that parses the tokens, and turns it into an AST.
-To build the AST, I selected Pratt Parsing and S-Expression instead of using the Shunting Yard algorithm and stacks. 
+   To build the AST, I selected Pratt Parsing and S-Expression instead of using the Shunting Yard algorithm and stacks.
 3. Evaluate the AST and output the calculated results.
 
 ## Program
 
 Git pull the repo and run the program.
+
 ```shell
    go run main.go
 ```
 
 or compile it first then run the corresponding executable on different platforms.
+
 ```shell
   # On Linux or MacOS
   go build -o calculator
@@ -49,6 +51,7 @@ or compile it first then run the corresponding executable on different platforms
 ```
 
 You can also run the existing binaries from the repo.
+
 ```shell
   # On Linux
   
@@ -57,7 +60,6 @@ You can also run the existing binaries from the repo.
   # On Windows
   calculator.exe
 ```
-
 
 After starting the program you'll see:
 
@@ -120,7 +122,7 @@ To quit the calculator:
     calc '(((1 + 2) * 3) + 4) * 5'                  // result: 65.00
   ```
 
-  Bracket expressions like below should cause error 
+  Bracket expressions like below should cause error
   ```go
     calc '(1 + 2 * 3'
     calc '1 + 2) * 3'
@@ -132,27 +134,7 @@ To quit the calculator:
     calc '{1 + 2) * 3] + 4} * 5'
   ```
 
-## TODOs
-
-- [ ] Float supports
-    ```go
-        calc '2.1 * 3.5'
-    ```
-   
-- [ ] Power with integers, sin, cos, tan.
-    ```go
-        // Power with integers
-        calc '2 ^ 3'
-        calc '5.5 ^ 6' 
-    ```
-    ```go
-        // sin, cos, tan
-        calc 'sin(37)' // result: 0.80
-        calc 'cos(37)' // result: 0.80 
-        calc 'tan(37)' // result: 0.75
-    ```
-   
-- [ ] Store previous result in **ans**.
+- [x] Store previous result in **ans**.
     ```go
         // First prompt
         calc '1 + 2'        // result: 3.00
@@ -163,7 +145,7 @@ To quit the calculator:
         // use 'ans' to called stored results
         calc 'ans * 12'     // result: 36.00 
     ```
-- [ ] Clear (AC button).
+- [x] Clear (AC button).
     ```go
         // First prompt
         calc '1 + 2'        // result: 3.00
@@ -180,15 +162,40 @@ To quit the calculator:
         // The current ans is 0.00
         calc 'ans'          // result: 0.00 
     ```
-    
+
+## TODOs
+
+- [ ] Float supports
+    ```go
+        calc '2.1 * 3.5'
+    ```
+
+- [ ] Power with integers, sin, cos, tan.
+    ```go
+        // Power with integers
+        calc '2 ^ 3'
+        calc '5.5 ^ 6' 
+    ```
+    ```go
+        // sin, cos, tan
+        calc 'sin(37)' // result: 0.80
+        calc 'cos(37)' // result: 0.80 
+        calc 'tan(37)' // result: 0.75
+    ```
 
 ## References
+
 ## Tools:
+
 - [AST Explorer](https://astexplorer.net)
+
 ## Video:
+
 - [Swift 3 Fun Algorithms: Abstract Syntax Tree](https://www.youtube.com/watch?v=r14Vtwi2k7s)
+
 ## Reads:
-- [Wikipedia: Shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm#The_algorithm_in_detail) 
+
+- [Wikipedia: Shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm#The_algorithm_in_detail)
 - [Wikipedia: S-expression](https://en.wikipedia.org/wiki/S-expression)
 - [Simple but Powerful Pratt Parsing](https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html#From-Precedence-to-Binding-Power)
 - [How Desmos uses Pratt Parsers](https://engineering.desmos.com/articles/pratt-parser/)
