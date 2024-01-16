@@ -15,39 +15,61 @@ func TestParser_Parse(t *testing.T) {
     t.Run("Incorrect input", func(t *testing.T) {
         testCases := []struct {
             input string
-            error error
+            err   error
         }{
             // Error calculator prompt.
-            {"", ErrPrompt},                  // missing the rest of the prompt.
-            {"caldc '5 + 5'", ErrPrompt},     // misspelled calc.
-            {"calc", ErrPrompt},              // missing the rest of the prompt.
-            {"calc 5 + 5'", ErrOpeningQuote}, // missing first single quote.
-            {"calc '5 + 5", ErrClosingQuote}, // missing closing single quote.
+            {input: "", err: ErrPrompt},                  // missing the rest of the prompt.
+            {input: "caldc '5 + 5'", err: ErrPrompt},     // misspelled calc.
+            {input: "calc", err: ErrPrompt},              // missing the rest of the prompt.
+            {input: "calc 5 + 5'", err: ErrOpeningQuote}, // missing first single quote.
+            {input: "calc '5 + 5", err: ErrClosingQuote}, // missing closing single quote.
+
+            // Error Opening brackets.
+            {input: "calc '(0'", err: ErrEquation},
+            {input: "calc '((0 + 1)'", err: ErrEquation},
+            {input: "calc '[(12 + 3 * 6] + 1'", err: ErrEquation},
+            {input: "calc '[(12 + 3) * 6 + 1'", err: ErrEquation},
+            {input: "calc '{[(12 + 3) * 6] + 1 * 2'", err: ErrEquation},
+
+            // Error closing brackets.
+            {input: "calc '0)'", err: ErrEquation},
+            {input: "calc '(0 + 1))'", err: ErrEquation},
+            {input: "calc '[12 + 3 * 6)] + 1'", err: ErrEquation},
+            {input: "calc '(12 + 3) * 6] + 1'", err: ErrEquation},
+            {input: "calc '()1 * 2'", err: ErrEquation},
+            {input: "calc '[(1]) * 2'", err: ErrEquation},
 
             // Error equation.
-            {"calc ''", ErrEquation},
-            {"calc '5 5'", ErrEquation},
-            {"calc '5 +'", ErrEquation},
+            {input: "calc ''", err: ErrEquation},
+            {input: "calc '5 5'", err: ErrEquation},
+            {input: "calc '5 +'", err: ErrEquation},
 
-            {"calc '*5'", ErrEquation},
-            {"calc '/5'", ErrEquation},
-            {"calc '-5 +'", ErrEquation},
-            //{"calc '(5 + 5'", ErrEquation},
-            // {"calc '5 + 5)'", ErrEquation},
+            {input: "calc '*5'", err: ErrEquation},
+            {input: "calc '/5'", err: ErrEquation},
+            {input: "calc '-5 +'", err: ErrEquation},
+            // Zero division.
+            {input: "calc '1 / 0'", err: ast.ErrZeroDivision},
         }
 
-        for testNum, i := range testCases {
-            p.input(i.input)
+        for testNum, tc := range testCases {
+            p.input(tc.input)
             err := p.parsePrompt()
-            if testNum < 5 && !errors.Is(err, i.error) {
-                t.Errorf("error parsing incorrect prompt: expected error %s, got error %s.\n", i.error, err)
+            if testNum < 16 && !errors.Is(err, tc.err) {
+                t.Errorf("error parsing incorrect prompt: expected error %s, got error %s.\n", tc.err, err)
             }
 
-            // All equation error test cases are after testNum 5.
-            if testNum >= 5 {
+            // All equation error test cases are after testNum 55.
+            if 17 <= testNum && testNum < 22 {
                 _, err = p.parseEquation(0)
-                if !errors.Is(err, i.error) {
-                    t.Errorf("error parsing incorrect equation: expected error %s, got error %s.\n", i.error, err)
+                if !errors.Is(err, tc.err) {
+                    t.Errorf("error parsing incorrect equation: expected error %s, got error %s.\n", tc.err, err)
+                }
+            } else if testNum >= 22 {
+                // For error equations like 1/0.
+                n, _ := p.parseEquation(0)
+                _, err = ast.Evaluate(n)
+                if !errors.Is(err, tc.err) {
+                    t.Errorf("error evaluating incorrect equation: expected error %s, got error %s.\n", tc.err, err)
                 }
             }
         }
@@ -61,93 +83,87 @@ func TestParser_Parse(t *testing.T) {
             err    error
         }{
             // Binary operation.
-            //{input: "calc '0'", tokens: 1, result: 0},
-            //{input: "calc '1 + 2'", tokens: 3, result: 3},
-            //{input: "calc '2 - 1'", tokens: 3, result: 1},
-            //{input: "calc '2 * 3'", tokens: 3, result: 6},
-            //{input: "calc '3 / 2'", tokens: 3, result: 1.5},
-            //{input: "calc '2 + 3 + 4'", tokens: 5, result: 9},
-            //{input: "calc '2 + 3 * 5'", tokens: 5, result: 17},
-            //{input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
-            //{input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
+            {input: "calc '0'", tokens: 1, result: 0},
+            {input: "calc '1 + 2'", tokens: 3, result: 3},
+            {input: "calc '2 - 1'", tokens: 3, result: 1},
+            {input: "calc '2 * 3'", tokens: 3, result: 6},
+            {input: "calc '3 / 2'", tokens: 3, result: 1.5},
+            {input: "calc '2 + 3 + 4'", tokens: 5, result: 9},
+
+            {input: "calc '2 + 3 * 5'", tokens: 5, result: 17},
+            {input: "calc '1 + 2 * 3'", tokens: 5, result: 7},
+            {input: "calc '3 * 7 + 5 * 4'", tokens: 7, result: 41},
+
+            {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
+            {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
 
             // Unary operation.
-            //{input: "calc '-1'", tokens: 2, result: -1},
-            //{input: "calc '-1 + 2'", tokens: 4, result: 1},
-            //{input: "calc '-1 + 2 * 5'", tokens: 6, result: 9},
-            //{input: "calc '--1'", tokens: 3, result: 1},
-            //{input: "calc '++5'", tokens: 3, result: 5},
-            //{input: "calc '5 + - 5'", tokens: 4, result: 0},
+            {input: "calc '-1'", tokens: 2, result: -1},
+            {input: "calc '-1 + 2'", tokens: 4, result: 1},
+            {input: "calc '-1 + 2 * 5'", tokens: 6, result: 9},
+            {input: "calc '--1'", tokens: 3, result: 1},
+            {input: "calc '++5'", tokens: 3, result: 5},
+            {input: "calc '5 + - 5'", tokens: 4, result: 0},
 
             // Brackets.
-            //{input: "calc '(0)'", tokens: 3, result: 0},
-            //{input: "calc '((0 + 1))'", tokens: 7, result: 1},
-            //{input: "calc '(((0) + 1))'", tokens: 9, result: 1},
-            //{input: "calc '((12 + 3) * 6) + 1'", tokens: 11, result: 91},
-            //{input: "calc '((12 + 3) * (1 + 5)) + 1'", tokens: 15, result: 91},
-            //
-            //{input: "calc '[(12 + 3) * 6] + 1'", tokens: 11, result: 91},
-            //{input: "calc '{[(12 + 3) * 6] + 1} * 2'", tokens: 15, result: 182},
+            {input: "calc '(0)'", tokens: 3, result: 0},
+            {input: "calc '((0 + 1))'", tokens: 7, result: 1},
+            {input: "calc '(1 + 2) * 3'", tokens: 7, result: 9},
+            {input: "calc '(((0) + 1))'", tokens: 9, result: 1},
+            {input: "calc '((12 + 3) * 6) + 1'", tokens: 11, result: 91},
+            {input: "calc '(((1 + 2) * 3) + 4) * 5'", tokens: 15, result: 65},
+            {input: "calc '((12 + 3) * (1 + 5)) + 1'", tokens: 15, result: 91},
 
-            // Error brackets.
-            {input: "calc '(0'", tokens: 2, err: ErrMissingClosingBracket},
-            {input: "calc '((0 + 1)'", tokens: 6, err: ErrMissingClosingBracket},
-            {input: "calc '[(12 + 3 * 6] + 1'", tokens: 10, err: ErrMissingClosingBracket},
-            {input: "calc '[(12 + 3) * 6 + 1'", tokens: 10, err: ErrMissingClosingBracket},
+            {input: "calc '[(12 + 3) * 6] + 1'", tokens: 11, result: 91},
+            {input: "calc '[(1 + 2) * 3] * 4'", tokens: 11, result: 36},
 
-
-            // Zero division.
-            {input: "calc '1 / 0'", tokens: 3, err: ast.ErrZeroDivision},
+            {input: "calc '{[(12 + 3) * 6] + 1} * 2'", tokens: 15, result: 182},
+            {input: "calc '{[(1 + 2) * 3] + 4} * 5'", tokens: 15, result: 65},
+            {input: "calc '{[(1 + 2) * 3] * [(100 / 20) + 8]} - 123'", tokens: 23, result: -6},
         }
 
-        for testNum, tc := range testCases {
+        for _, tc := range testCases {
             p.input(tc.input)
             err := p.parsePrompt()
             if err != nil {
-                t.Errorf("Error parsing calculator prompt, got error: %v.\n", err)
-            }
-
-            // Check the first token, should be a calc token.
-            if p.root.Token.LexicalType != token.CALC {
-                t.Errorf("error root token type: expected %s, got %s.\n", token.CALC, p.root.Token.LexicalType)
-            }
-
-            if p.root.Token.Literal != "calc" {
-                t.Errorf("error root token literal: expected %s, got %s.\n", "calc", p.root.Token.Literal)
-            }
-
-            if p.root.EquationTokens == nil {
-                t.Errorf("error parsing equation: expected non nil root.\n")
-            }
-
-            if len(p.root.EquationTokens) != tc.tokens {
-                t.Errorf("error parsing equation: incorrect amount of equation tokens, expected %d, got %d.\n", tc.tokens, len(p.root.EquationTokens))
-            }
-
-            n, err := p.parseEquation(0)
-            if err != nil {
-                if tc.err != nil {
-                    if !errors.Is(err, tc.err) {
-                        t.Errorf("error incorrect error: expected error %s, got error %s.\n", ast.ErrZeroDivision, err)
-                    }
+                if tc.err == nil {
+                    t.Errorf("Error parsing calculator prompt, got error: %v.\n", err)
                 } else {
+                    if !errors.Is(err, tc.err) {
+                        t.Errorf("error incorrect error: expected error %s, got error %s.\n", tc.err, err)
+                    }
+                }
+            } else {
+                // Check the first token, should be a calc token.
+                if p.root.Token.LexicalType != token.CALC {
+                    t.Errorf("error root token type: expected %s, got %s.\n", token.CALC, p.root.Token.LexicalType)
+                }
+
+                if p.root.Token.Literal != "calc" {
+                    t.Errorf("error root token literal: expected %s, got %s.\n", "calc", p.root.Token.Literal)
+                }
+
+                if p.root.EquationTokens == nil {
+                    t.Errorf("error parsing equation: expected non nil root.\n")
+                }
+
+                if len(p.root.EquationTokens) != tc.tokens {
+                    t.Errorf("error parsing equation: incorrect amount of equation tokens, expected %d, got %d.\n", tc.tokens, len(p.root.EquationTokens))
+                }
+
+                n, err := p.parseEquation(0)
+                if err != nil {
                     t.Errorf("Error parsing equation: got error %s.\n", err)
                 }
-            }
 
-            val, err := ast.Evaluate(n)
-            if err != nil {
-                if tc.err != nil {
-                    if !errors.Is(err, tc.err) {
-                        t.Errorf("error incorrect error: expected error %s, got error %s.\n", ast.ErrZeroDivision, err)
-                    }
-                } else {
+                val, err := ast.Evaluate(n)
+                if err != nil {
                     t.Errorf("error calculating: got error %s.\n", err)
                 }
-            }
 
-            if testNum != len(testCases)-1 && val != tc.result {
-                t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
+                if val != tc.result {
+                    t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
+                }
             }
         }
     })
