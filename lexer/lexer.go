@@ -8,7 +8,12 @@ package lexer
 import (
     "LexicalCalculator/token"
     "bytes"
+    "errors"
     "fmt"
+)
+
+var (
+    ErrInvalidLiteral = errors.New("error token not valid")
 )
 
 // Lexer is the lexical analyzer used in the calculator.
@@ -62,14 +67,14 @@ func (l *Lexer) ReadNextToken() *token.Token {
     l.nextPosition++
 
     // When encounter a white space, advance the pointer.
-    whiteSpaces := map[string]struct{}{" ": {}, "\n": {}, "\t": {}, "\r": {}}
-
-    _, ok := whiteSpaces[string(next)]
-    for ok {
-        next = l.inputBuffer.Next(1)
-        l.currPosition++
-        l.nextPosition++
-        _, ok = whiteSpaces[string(next)]
+    if len(next) > 0 {
+        ok := isWhiteSpace(next[0])
+        for ok {
+            next = l.inputBuffer.Next(1)
+            l.currPosition++
+            l.nextPosition++
+            ok = isWhiteSpace(next[0])
+        }
     }
 
     switch string(next) {
@@ -102,8 +107,16 @@ func (l *Lexer) ReadNextToken() *token.Token {
         if isDigit(next[0]) {
             // The current ch is next[0].
             // What we do here is to advance the pointer and fetch the entire token.
-            literal := l.readNumber(next[0])
-            tok = token.New(token.INT, literal)
+            literal, isInt, err := l.readNumber(next[0])
+            if err != nil {
+                tok = token.New(token.UNKNOWN, literal)
+            } else {
+                if isInt {
+                    tok = token.New(token.INT, literal)
+                } else {
+                    tok = token.New(token.FLOAT, literal)
+                }
+            }
         } else if isLetter(next[0]) {
             literal := l.readIdentifier(next[0])
             switch literal {
@@ -124,22 +137,39 @@ func (l *Lexer) ReadNextToken() *token.Token {
 
 // readNumber returns the integer literal of a number.
 // It advances the pointer until it's at the end of an input or when the next character isn't a digit.
-func (l *Lexer) readNumber(first byte) string {
-    digits := make([]byte, 0)
-    digits = append(digits, first)
+func (l *Lexer) readNumber(first byte) (literal string, isInt bool, err error) {
+    decimalSeparatorCount := 0
+
+    numberLiteral := make([]byte, 0)
+    numberLiteral = append(numberLiteral, first)
     for {
         peekedToken, _ := peekBuffer(*l.inputBuffer, 1)
-        if isDigit(peekedToken) {
+        if isDigit(peekedToken) || isDecimalSeparator(peekedToken) {
             next := l.inputBuffer.Next(1)
             l.currPosition++
             l.nextPosition++
-            digits = append(digits, next[0])
+            numberLiteral = append(numberLiteral, next[0])
+
+            if isDecimalSeparator(peekedToken) {
+                decimalSeparatorCount++
+                peekedToken, _ = peekBuffer(*l.inputBuffer, 1)
+                if !isDigit(peekedToken) {
+                    // When there's no digit after the decimal separator.
+                    err = ErrInvalidLiteral
+                }
+            }
         } else {
             break
         }
     }
-
-    return string(digits)
+    switch {
+    case err != nil, decimalSeparatorCount > 1:
+        return string(numberLiteral), false, ErrInvalidLiteral
+    case decimalSeparatorCount == 1:
+        return string(numberLiteral), false, nil
+    default:
+        return string(numberLiteral), true, nil
+    }
 }
 
 // readNumber returns the literal of an identifier.
@@ -203,4 +233,14 @@ func isLetter(ch byte) bool {
         return true
     }
     return false
+}
+
+func isDecimalSeparator(ch byte) bool {
+    return ch == 46
+}
+
+func isWhiteSpace(ch byte) bool {
+    whiteSpaces := map[string]struct{}{" ": {}, "\n": {}, "\t": {}, "\r": {}}
+    _, ok := whiteSpaces[string(ch)]
+    return ok
 }
