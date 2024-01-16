@@ -106,9 +106,12 @@ func (l *Lexer) ReadNextToken() *token.Token {
             tok = token.New(token.INT, literal)
         } else if isLetter(next[0]) {
             literal := l.readIdentifier(next[0])
-            if literal == "calc" {
+            switch literal {
+            case "calc":
                 tok = token.New(token.CALC, literal)
-            } else {
+            case "ans":
+                tok = token.New(token.ANS, literal)
+            default:
                 tok = token.New(token.UNKNOWN, literal)
             }
         } else {
