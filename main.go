@@ -10,9 +10,10 @@ import (
 )
 
 const (
-    REPL = ">> "
-    QUIT = "quit"
-    HELP = "help"
+    REPL  = ">> "
+    QUIT  = "quit"
+    HELP  = "help"
+    CLEAR = "clear"
 )
 
 func main() {
@@ -41,7 +42,9 @@ func main() {
             fmt.Println("    - calc '<equation>'")
             fmt.Println("    - quit")
             fmt.Println("    - help")
-
+        case CLEAR:
+            p.Result = 0
+            continue
         case QUIT:
             fmt.Println("Exit Calculator.")
             return
