@@ -9,11 +9,10 @@ import (
 )
 
 var (
-    ErrPrompt                = errors.New("error incorrect prompt")
-    ErrOpeningQuote          = errors.New("error missing prompt opening quote")
-    ErrClosingQuote          = errors.New("error missing prompt closing quote")
-    ErrEquation              = errors.New("error equation format")
-    ErrMissingClosingBracket = errors.New("error missing closing bracket")
+    ErrPrompt       = errors.New("error incorrect prompt")
+    ErrOpeningQuote = errors.New("error missing prompt opening quote")
+    ErrClosingQuote = errors.New("error missing prompt closing quote")
+    ErrEquation     = errors.New("error equation format")
 )
 
 // Parser reads token from the lexer.
@@ -115,6 +114,9 @@ func (p *Parser) parsePrompt() error {
             p.root.EquationTokens = append(p.root.EquationTokens, p.currToken)
         }
     }
+    if !hasBalanceBrackets(p.root.EquationTokens) {
+        return ErrEquation
+    }
 
     return nil
 }
@@ -130,7 +132,7 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
         lhsVal, _ := strconv.Atoi(lhsTok.Literal)
         lhs = ast.New(lhsTok, lhsVal, true, "", false, nil, nil)
 
-    case isOperator(lhsTok) && lhs == nil:
+    case isOperator(lhsTok):
         rbp := prefixBindingPower(lhsTok)
         // Scenario: Unknown operator.
         if rbp == 0 {
@@ -145,12 +147,20 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
 
         lhs = ast.New(lhsTok, 0, false, lhsTok.Literal, true, nil, rightChild)
 
-    case isBracket(lhsTok):
-        lhs, _ = p.parseEquation(0)
+    case isLeftBracket(lhsTok):
+        var err error
+        lhs, err = p.parseEquation(0)
+        if err != nil {
+            // Cases like [(12 + 3 * 6] + 1 might happen.
+            // We need to inherit the error from the last recursive call and break.
+            return nil, err
+        }
+
         if p.peekEquationToken() == nil {
-            return nil, ErrMissingClosingBracket
-        } else if p.peekEquationToken().LexicalType != correspondingBracket[lhsTok.LexicalType] {
-            return nil, ErrMissingClosingBracket
+            return nil, ErrEquation
+        } else if p.peekEquationToken().LexicalType != correspondingRightBracket[lhsTok.LexicalType] {
+            // Closing brackets doesn't match.
+            return nil, ErrEquation
         } else {
             // Consume the correct right parenthesis.
             p.nextEquationToken()
@@ -163,12 +173,18 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
 
     for {
         op := p.peekEquationToken()
-        if op == nil || op.LexicalType == token.RPAREN || op.LexicalType == token.RSQBRACK || op.LexicalType == token.RCURBRACK {
-            // If there is no more operators in equation ( or following tokens ), break out of the loop.
+        if op == nil {
+            // If there is no more operators in equation, break out of the loop.
+            break
+        }
+
+        if isRightBracket(op) {
+            // If it's a right bracket, break out of the loop.
             break
         }
 
         // Scenario: Missing operator between integer tokens, like '5 25'.
+        // This also deals with something like '0)'.
         if !isOperator(op) {
             return nil, ErrEquation
         }
@@ -274,19 +290,57 @@ func isInt(tok *token.Token) bool {
     return false
 }
 
-// correspondingBracket is the bracket relationship.
-var correspondingBracket = map[string]string{
-    token.LPAREN:    token.RPAREN,
-    token.LSQBRACK:  token.LSQBRACK,
-    token.LCURBRACK: token.RCURBRACK,
-}
+var correspondingRightBracket = map[string]string{token.LPAREN: token.RPAREN, token.LSQBRACK: token.RSQBRACK, token.LCURBRACK: token.RCURBRACK}
+var correspondingLeftBracket = map[string]string{token.RPAREN: token.LPAREN, token.RSQBRACK: token.LSQBRACK, token.RCURBRACK: token.LCURBRACK}
 
-// isBracket checks whether a token is a bracket.
-func isBracket(tok *token.Token) bool {
+// isLeftBracket checks whether a token is a left bracket.
+func isLeftBracket(tok *token.Token) bool {
     if tok == nil {
         return false
     }
 
-    _, ok := correspondingBracket[tok.LexicalType]
+    _, ok := correspondingRightBracket[tok.LexicalType]
     return ok
+}
+
+// isLeftBracket checks whether a token is a right bracket.
+func isRightBracket(tok *token.Token) bool {
+    if tok == nil {
+        return false
+    }
+    _, ok := correspondingLeftBracket[tok.LexicalType]
+    return ok
+}
+
+// hasBalanceBrackets checks whether the tokens has balances parentheses.
+func hasBalanceBrackets(tokens []*token.Token) bool {
+    stack := make([]*token.Token, 0)
+    pop := func(stack *[]*token.Token) {
+        if len(*stack) != 0 {
+            *stack = (*stack)[0 : len(*stack)-1]
+        }
+    }
+
+    // Check if the opening and closing parentheses matches.
+    // Check invalid brackets like [(]).
+    // Check if there are adjacent opening and closing brackets, (), [] and {} are invalid.
+    for n, tok := range tokens {
+        switch {
+        case isLeftBracket(tok):
+            stack = append(stack, tok)
+        case isRightBracket(tok):
+            // Check if the last token is the current tokens' corresponding left bracket, i.e. ()23 + 5 or 23 + 5().
+            if n > 0 && tokens[n-1].LexicalType != correspondingLeftBracket[tok.LexicalType] {
+                // If the stack length is 0, we have a redundant closing bracket.
+                // If the type of last token in the stack isn't the corresponding left bracket, we have invalid bracket grammar, i.e. [(]).
+                if len(stack) == 0 || stack[len(stack)-1].LexicalType != correspondingLeftBracket[tok.LexicalType] {
+                    return false
+                }
+                pop(&stack)
+            }
+        }
+    }
+
+    // If the length of the stack isn't 0, we have opening brackets that aren't closed.
+    return len(stack) == 0
 }
