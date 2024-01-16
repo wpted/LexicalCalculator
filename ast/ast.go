@@ -30,7 +30,7 @@ type Node struct {
     IsOperator bool
     Operator   string
     IsValue    bool
-    Value      int
+    Value      float32
     Left       *Node
     Right      *Node
 }
@@ -48,7 +48,7 @@ func (n *Node) String() string {
 }
 
 // New creates a new Node.
-func New(tok *token.Token, value int, isValue bool, operation string, isOperator bool, leftChild *Node, rightNode *Node) *Node {
+func New(tok *token.Token, value float32, isValue bool, operation string, isOperator bool, leftChild *Node, rightNode *Node) *Node {
     return &Node{
         Token:      tok,
         IsOperator: isOperator,
@@ -80,7 +80,7 @@ func Evaluate(equationNode *Node) (float32, error) {
     }
 
     if equationNode.IsValue {
-        return float32(equationNode.Value), nil
+        return equationNode.Value, nil
     }
 
     if equationNode.IsOperator {
