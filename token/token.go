@@ -1,7 +1,9 @@
 package token
 
 const (
-    CALC = "CALC"
+    CALC  = "CALC"
+    ANS   = "ANS"
+    CLEAR = "CLEAR"
 
     SINGLEQUOTE = "'"
     LPAREN      = "("
@@ -11,7 +13,8 @@ const (
     LCURBRACK   = "{"
     RCURBRACK   = "}"
 
-    INT = "INT"
+    INT   = "INT"
+    FLOAT = "FLOAT"
 
     PLUS     = "+"
     MINUS    = "-"
