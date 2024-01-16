@@ -22,7 +22,7 @@ type Parser struct {
     currToken      *token.Token
     nextToken      *token.Token
     equationCursor int
-    Result         float32
+    result         float32
 }
 
 // New creates a new instance of a Parser.
@@ -42,8 +42,13 @@ func (p *Parser) Evaluate(input string) (float32, error) {
         return 0, err
     }
     result, err := ast.Evaluate(n)
-    p.Result = result
+    p.result = result
     return result, err
+}
+
+// ClearPreviousAns resets the stored result to 0.
+func (p *Parser) ClearPreviousAns() {
+    p.result = 0
 }
 
 // input takes input data and send it to the lexer.
@@ -133,7 +138,7 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
     switch {
     case isInt(lhsTok):
         lhsVal, _ := strconv.Atoi(lhsTok.Literal)
-        lhs = ast.New(lhsTok, lhsVal, true, "", false, nil, nil)
+        lhs = ast.New(lhsTok, float32(lhsVal), true, "", false, nil, nil)
 
     case isOperator(lhsTok):
         rbp := prefixBindingPower(lhsTok)
@@ -168,6 +173,8 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
             // Consume the correct right parenthesis.
             p.nextEquationToken()
         }
+    case isAns(lhsTok):
+        lhs = ast.New(lhsTok, p.result, true, "", false, nil, nil)
 
     default:
         // Scenario: Missing an integer, like '' or '5 + '.
@@ -271,6 +278,11 @@ func prefixBindingPower(operatorToken *token.Token) int {
     default:
         return 0
     }
+}
+
+// isAns checks whether a token is an 'ans' token.
+func isAns(tok *token.Token) bool {
+    return tok.LexicalType == token.ANS
 }
 
 // operatorSet stores all operator type.
