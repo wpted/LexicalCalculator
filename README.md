@@ -18,7 +18,7 @@ Parsing is the process by which a compiler turns a sequence of tokens into a tre
 We are to take prompts like:
 
 ```go
-calc '1 + 2 * 3'
+    calc '1 + 2 * 3'
 ```
 
 and return the result.
@@ -64,10 +64,10 @@ You can also run the existing binaries from the repo.
 After starting the program you'll see:
 
 ```go
-Calculator Started.
->>>> Input your calculator prompt in format - calc '<your equation here>'
->>>> Or type help to see instructions.
->> Insert your prompt:
+    Calculator Started.
+    >>>> Input your calculator prompt in format - calc '<your equation here>'
+    >>>> Or type help to see instructions.
+    >> Insert your prompt:
 ```
 
 There is two type of prompt:
@@ -140,47 +140,41 @@ To quit the calculator:
 
 - [x] Store previous result in **ans**.
     ```go
-        // First prompt
-        calc '1 + 2'        // result: 3.0000
+    // First prompt
+    calc '1 + 2'        // result: 3.0000
         
-        // The current 'ans' is 36.00
-        calc 'ans'          // result: 36.0000
+    // The current 'ans' is 36.00
+    calc 'ans'          // result: 36.0000
             
-        // use 'ans' to called stored results
-        calc 'ans * 12'     // result: 36.0000
+    // use 'ans' to called stored results
+    calc 'ans * 12'     // result: 36.0000
     ```
 - [x] Clear (AC button).
     ```go
-        // First prompt
-        calc '1 + 2'        // result: 3.0000
+    // First prompt
+    calc '1 + 2'        // result: 3.0000
    
-        // use 'ans' to called stored results
-        calc 'ans * 12'     // result: 36.0000
+    // use 'ans' to called stored results
+    calc 'ans * 12'     // result: 36.0000
    
-        // The current ans is 36.00
-        calc 'ans'          // result: 36.0000
+    // The current ans is 36.00
+    calc 'ans'          // result: 36.0000
    
-        // Clear 'ans'
-        clear
+    // Clear 'ans'
+    clear
    
-        // The current 'ans' is 0.0000
-        calc 'ans'          // result: 0.0000 
+    // The current 'ans' is 0.0000
+    calc 'ans'          // result: 0.0000 
     ```
 
 ## TODOs
 
 
-- [ ] Power with integers, sin, cos, tan.
+- [ ] Power with **^**
     ```go
-        // Power with integers
-        calc '2 ^ 3'
-        calc '5.5 ^ 6' 
-    ```
-    ```go
-        // sin, cos, tan
-        calc 'sin(37)' // result: 0.80
-        calc 'cos(37)' // result: 0.80 
-        calc 'tan(37)' // result: 0.75
+    // Power with integers
+    calc '2 ^ 3'
+    calc '5.5 ^ 6' 
     ```
 
 ## References
