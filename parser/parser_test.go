@@ -90,11 +90,15 @@ func TestParser_Parse(t *testing.T) {
             {input: "calc '2.1 - 1'", tokens: 3, result: 1.1},
             {input: "calc '2.2 * 3'", tokens: 3, result: 6.6},
             {input: "calc '3 / 2'", tokens: 3, result: 1.5},
-            {input: "calc '2 + 3 + 4'", tokens: 5, result: 9},
+            {input: "calc '0 ^ 2'", tokens: 3, result: 0},
+            {input: "calc '2 ^ 0'", tokens: 3, result: 1},
+            {input: "calc '2 ^ 2'", tokens: 3, result: 4},
 
+            {input: "calc '2 + 3 + 4'", tokens: 5, result: 9},
             {input: "calc '2 + 3 * 5'", tokens: 5, result: 17},
             {input: "calc '1 + 2 * 3'", tokens: 5, result: 7},
             {input: "calc '3 * 7 + 5 * 4'", tokens: 7, result: 41},
+            {input: "calc '1 + 2 ^ 2'", tokens: 5, result: 5},
 
             {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
             {input: "calc '2 + 2 + 2 + 2 - 1'", tokens: 9, result: 7},
@@ -107,6 +111,7 @@ func TestParser_Parse(t *testing.T) {
             {input: "calc '--1'", tokens: 3, result: 1},
             {input: "calc '++5'", tokens: 3, result: 5},
             {input: "calc '5 + - 5'", tokens: 4, result: 0},
+            {input: "calc '2 ^ -1'", tokens: 4, result: 0.5},
 
             // Brackets.
             {input: "calc '(0)'", tokens: 3, result: 0},
