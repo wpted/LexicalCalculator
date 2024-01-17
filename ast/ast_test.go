@@ -89,8 +89,8 @@ func TestEvaluate(t *testing.T) {
     leaf1 := New(nil, 6, true, "", false, nil, nil)
     leaf2 := New(nil, 3, true, "", false, nil, nil)
     leaf3 := New(nil, 5, true, "", false, nil, nil)
-    //leaf4 := New(nil, 0, false, "+", true, leaf1, leaf2)
-    //leaf5 := New(nil, 0, false, "*", true, leaf1, leaf2)
+    leaf4 := New(nil, 0, false, "+", true, leaf1, leaf2)
+    leaf5 := New(nil, 0, false, "*", true, leaf1, leaf2)
     leaf6 := New(nil, 0, false, "^", true, leaf1, leaf2)
 
     testCases := []struct {
@@ -99,83 +99,83 @@ func TestEvaluate(t *testing.T) {
         right  *Node
         result float64
     }{
-        //{
-        //    // nil node
-        //    root:   nil,
-        //    left:   nil,
-        //    right:  nil,
-        //    result: 0,
-        //},
-        //{
-        //    // 6
-        //    root:   leaf1,
-        //    left:   nil,
-        //    right:  nil,
-        //    result: 6,
-        //},
-        //{
-        //    // -6
-        //    root:   New(nil, 0, false, "-", true, nil, leaf1),
-        //    left:   nil,
-        //    right:  leaf1,
-        //    result: -6,
-        //},
-        //{
-        //    // 6 + 3
-        //    root:   New(nil, 0, false, "+", true, leaf1, leaf2),
-        //    left:   leaf1,
-        //    right:  leaf2,
-        //    result: 9,
-        //},
-        //{
-        //    // 6 - 3
-        //    root:   New(nil, 0, false, "-", true, leaf1, leaf2),
-        //    left:   leaf1,
-        //    right:  leaf2,
-        //    result: 3,
-        //},
-        //{
-        //    // 6 * 3
-        //    root:   New(nil, 0, false, "*", true, leaf1, leaf2),
-        //    left:   leaf1,
-        //    right:  leaf2,
-        //    result: 18,
-        //},
-        //{
-        //    // 6 / 3
-        //    root:   New(nil, 0, false, "/", true, leaf1, leaf2),
-        //    left:   leaf1,
-        //    right:  leaf2,
-        //    result: 2,
-        //},
-        //{
-        //    // 6 / 3
-        //    root:   New(nil, 0, false, "/", true, leaf1, leaf2),
-        //    left:   leaf1,
-        //    right:  leaf2,
-        //    result: 2,
-        //},
-        //{
-        //    // 6 ^ 3
-        //    root:   New(nil, 0, false, "^", true, leaf1, leaf2),
-        //    left:   leaf1,
-        //    right:  leaf2,
-        //    result: 216,
-        //},
-        //{
-        //    // 5 + 6 + 3
-        //    root:   New(nil, 0, false, "+", true, leaf3, leaf4),
-        //    left:   leaf3,
-        //    right:  leaf4,
-        //    result: 14,
-        //},
-        //{
-        //    // 5 + 6 * 3
-        //    root:   New(nil, 0, false, "+", true, leaf3, leaf5),
-        //    left:   leaf3,
-        //    right:  leaf5,
-        //    result: 23,
-        //},
+        {
+            // nil node
+            root:   nil,
+            left:   nil,
+            right:  nil,
+            result: 0,
+        },
+        {
+            // 6
+            root:   leaf1,
+            left:   nil,
+            right:  nil,
+            result: 6,
+        },
+        {
+            // -6
+            root:   New(nil, 0, false, "-", true, nil, leaf1),
+            left:   nil,
+            right:  leaf1,
+            result: -6,
+        },
+        {
+            // 6 + 3
+            root:   New(nil, 0, false, "+", true, leaf1, leaf2),
+            left:   leaf1,
+            right:  leaf2,
+            result: 9,
+        },
+        {
+            // 6 - 3
+            root:   New(nil, 0, false, "-", true, leaf1, leaf2),
+            left:   leaf1,
+            right:  leaf2,
+            result: 3,
+        },
+        {
+            // 6 * 3
+            root:   New(nil, 0, false, "*", true, leaf1, leaf2),
+            left:   leaf1,
+            right:  leaf2,
+            result: 18,
+        },
+        {
+            // 6 / 3
+            root:   New(nil, 0, false, "/", true, leaf1, leaf2),
+            left:   leaf1,
+            right:  leaf2,
+            result: 2,
+        },
+        {
+            // 6 / 3
+            root:   New(nil, 0, false, "/", true, leaf1, leaf2),
+            left:   leaf1,
+            right:  leaf2,
+            result: 2,
+        },
+        {
+            // 6 ^ 3
+            root:   New(nil, 0, false, "^", true, leaf1, leaf2),
+            left:   leaf1,
+            right:  leaf2,
+            result: 216,
+        },
+        {
+            // 5 + 6 + 3
+            root:   New(nil, 0, false, "+", true, leaf3, leaf4),
+            left:   leaf3,
+            right:  leaf4,
+            result: 14,
+        },
+        {
+            // 5 + 6 * 3
+            root:   New(nil, 0, false, "+", true, leaf3, leaf5),
+            left:   leaf3,
+            right:  leaf5,
+            result: 23,
+        },
         {
             // 5 + 6 ^ 3
             root:   New(nil, 0, false, "+", true, leaf3, leaf6),

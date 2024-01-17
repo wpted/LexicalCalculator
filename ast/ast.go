@@ -4,6 +4,7 @@ import (
     "LexicalCalculator/token"
     "errors"
     "fmt"
+    "math"
 )
 
 // An equation '5 + 2 * 3' should be represented as
@@ -99,6 +100,8 @@ func Evaluate(equationNode *Node) (float64, error) {
                 return 0, ErrZeroDivision
             }
             return left / right, err
+        case "^":
+            return math.Pow(left, right), err
         }
     }
 
