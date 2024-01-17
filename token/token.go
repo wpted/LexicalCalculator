@@ -15,10 +15,11 @@ const (
     INT   = "INT"
     FLOAT = "FLOAT"
 
-    PLUS     = "+"
-    MINUS    = "-"
-    ASTERISK = "*"
-    SLASH    = "/"
+    PLUS       = "+"
+    MINUS      = "-"
+    ASTERISK   = "*"
+    SLASH      = "/"
+    CIRCUMFLEX = "^"
 
     UNKNOWN = "UNKNOWN"
     EOF     = "EOF"
