@@ -23,6 +23,19 @@ We are to take prompts like:
 
 and return the result.
 
+Operation precedence are taken cared using binding power like below:
+
+```text
+  
+Equation            -   1     +     3   *   2   ^   2
+                   / \       / \       / \     / \
+Binding power         5     1   2     3   4   6   7
+                     rbp   lbp  rbp
+```
+
+In each loop we compare lbp and the passed-in min_bp, if lbp is greater, the operator has higher priority.
+
+
 ## Implementation Steps
 
 1. Create a lexer that tokenizes the input.
@@ -106,16 +119,28 @@ To quit the calculator:
     calc '3 / 2' // result: 1.5000
   ```
 
+- [x] Power with **^**
+  
+  ```go
+    // Power with integers 
+    calc '2 ^ 3'        // result: 6.0000
+    calc '5.5 ^ 6'      // result: 27680.6406
+    calc '-1 ^ 4'       // result: -1.0000
+    calc '(-1) ^ 4'     // result: 1.0000
+  ```
+
 - [x] Mixed operations:
 
   ```go
-    calc '1 + 2 * 3'     // result: 7.0000
-    calc '3 * 7 + 5 * 4' // result: 41.0000
+    calc '1 + 2 * 3'             // result: 7.0000
+    calc '3 * 7 + 5 * 4'         // result: 41.0000
+    calc '3 * 7 + 2 ^ 4 - 7 ^ 0' // result: 36.0000
   ```
 
   The result is rounded to 4 decimal places.
 
 - [x] Brackets:
+
   ```go
     calc '(1 + 2) * 3'                              // result: 9.0000
     calc '[(1 + 2) * 3] * 4'                        // result: 36.0000
@@ -125,21 +150,32 @@ To quit the calculator:
     // Also supports equations with all parenthesis.
     calc '(((1 + 2) * 3) + 4) * 5'                  // result: 65.0000
   ```
+  
+  Mixed operations of brackets and **^** are handled.
 
-  Bracket expressions like below should cause error
   ```go
-    calc '(1 + 2 * 3'
-    calc '1 + 2) * 3'
-
-    calc '[(1 + 2 * 3] * 4'
-    calc '[1 + 2) * 3] * 4'
-    calc '[(1 + 2) * 3 * 4'
-
-    calc '{1 + 2) * 3] + 4} * 5'
+    // Should be different
+    calc '-1 ^ 4'   // result: -1.0000
+    calc '(-1) ^ 4' // result: 1.0000
   ```
 
-- [x] Store previous result in **ans**.
+
+  - Bracket expressions like below should cause error (unbalanced brackets):
+
     ```go
+        calc '(1 + 2 * 3'
+        calc '1 + 2) * 3'
+
+        calc '[(1 + 2 * 3] * 4'
+        calc '[1 + 2) * 3] * 4'
+        calc '[(1 + 2) * 3 * 4'
+
+        calc '{1 + 2) * 3] + 4} * 5'
+    ```
+
+- [x] Store previous result in **ans**.
+  
+  ```go
     // First prompt
     calc '1 + 2'        // result: 3.0000
         
@@ -150,7 +186,8 @@ To quit the calculator:
     calc 'ans * 12'     // result: 36.0000
     ```
 - [x] Clear (AC button).
-    ```go
+  
+  ```go
     // First prompt
     calc '1 + 2'        // result: 3.0000
    
@@ -165,16 +202,6 @@ To quit the calculator:
    
     // The current 'ans' is 0.0000
     calc 'ans'          // result: 0.0000 
-    ```
-
-## TODOs
-
-
-- [ ] Power with **^**
-    ```go
-    // Power with integers
-    calc '2 ^ 3'
-    calc '5.5 ^ 6' 
     ```
 
 ## References
