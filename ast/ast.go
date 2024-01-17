@@ -7,17 +7,7 @@ import (
     "math"
 )
 
-// An equation '5 + 2 * 3' should be represented as
-//       +
-//      / \
-//     5   *
-//        / \
-//       2   3
-// and have a string form of (+ 5 (* 2 3))
-
-var (
-    ErrZeroDivision = errors.New("error cannot use 0 as denominator")
-)
+var ErrZeroDivision = errors.New("error cannot use 0 as denominator")
 
 // Root should be the ast root of a calculator prompt.
 type Root struct {
