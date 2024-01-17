@@ -2,20 +2,12 @@ package parser
 
 import (
     "LexicalCalculator/ast"
+    "LexicalCalculator/helper"
     "LexicalCalculator/lexer"
     "LexicalCalculator/token"
     "errors"
-    "math"
     "testing"
 )
-
-func almostEqual(a, b float64, epsilon float64) bool {
-    if a == b {
-        return true
-    }
-    diff := math.Abs(a - b)
-    return diff < epsilon
-}
 
 func TestParser_Parse(t *testing.T) {
     l := lexer.New()
@@ -174,7 +166,7 @@ func TestParser_Parse(t *testing.T) {
                 }
                 p.result = val
                 // Setting epsilon as accuracy.
-                if !almostEqual(val, float64(tc.result), 0.0001) {
+                if !helper.AlmostEqual(val, float64(tc.result), 0.0001) {
                     t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
                 }
             }
