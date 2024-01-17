@@ -102,6 +102,8 @@ func (l *Lexer) ReadNextToken() *token.Token {
         tok = token.New(token.ASTERISK, string(next))
     case "/":
         tok = token.New(token.SLASH, string(next))
+    case "^":
+        tok = token.New(token.CIRCUMFLEX, string(next))
     default:
         // We handle integers and 'calc' here.
         if isDigit(next[0]) {
