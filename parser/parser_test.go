@@ -111,6 +111,7 @@ func TestParser_Parse(t *testing.T) {
             {input: "calc '--1'", tokens: 3, result: 1},
             {input: "calc '++5'", tokens: 3, result: 5},
             {input: "calc '5 + - 5'", tokens: 4, result: 0},
+            {input: "calc '-1 ^ 4'", tokens: 4, result: -1},
             {input: "calc '2 ^ -1'", tokens: 4, result: 0.5},
 
             // Brackets.
@@ -121,6 +122,7 @@ func TestParser_Parse(t *testing.T) {
             {input: "calc '((2.1 + 3.7) * 4.425) * 6'", tokens: 11, result: 153.99},
             {input: "calc '(((1 + 2) * 3) + 4) * 5'", tokens: 15, result: 65},
             {input: "calc '((12 + 3) * (1 + 5)) + 1'", tokens: 15, result: 91},
+            {input: "calc '(-1) ^ 4'", tokens: 6, result: 1},
 
             {input: "calc '[(12 + 3) * 6] + 1'", tokens: 11, result: 91},
             {input: "calc '[(1 + 2) * 3] * 4'", tokens: 11, result: 36},
