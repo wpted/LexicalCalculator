@@ -15,6 +15,13 @@ var (
     ErrEquation     = errors.New("error equation format")
 )
 
+var (
+    // operatorSet stores all operator type.
+    operatorSet               = map[string]struct{}{token.PLUS: {}, token.MINUS: {}, token.SLASH: {}, token.ASTERISK: {}, token.CIRCUMFLEX: {}}
+    correspondingRightBracket = map[string]string{token.LPAREN: token.RPAREN, token.LSQBRACK: token.RSQBRACK, token.LCURBRACK: token.RCURBRACK}
+    correspondingLeftBracket  = map[string]string{token.RPAREN: token.LPAREN, token.RSQBRACK: token.LSQBRACK, token.RCURBRACK: token.LCURBRACK}
+)
+
 // Parser reads token from the lexer.
 type Parser struct {
     root           *ast.Root
@@ -129,6 +136,26 @@ func (p *Parser) parsePrompt() error {
     return nil
 }
 
+// peekEquationToken retrieves the next token from equationTokens without advancing the cursor.
+// If the cursor is at the end of the token list, it returns nil to indicate that there are no more tokens.
+func (p *Parser) peekEquationToken() *token.Token {
+    if p.equationCursor >= len(p.root.EquationTokens) {
+        return nil
+    }
+    return p.root.EquationTokens[p.equationCursor]
+}
+
+// nextEquationToken retrieves the next token from equationTokens list and advances the cursor.
+// If the cursor is at the end of the token list, it returns nil to indicate that there are no more tokens.
+func (p *Parser) nextEquationToken() *token.Token {
+    if p.equationCursor >= len(p.root.EquationTokens) {
+        return nil
+    }
+    tok := p.root.EquationTokens[p.equationCursor]
+    p.equationCursor++
+    return tok
+}
+
 // parseEquation parses the equation stored in the Parser into an *ast.Node.
 func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
     // Left hand side. Calling nextEquationToken returns the currToken the pointer is pointing at then advances it.
@@ -239,26 +266,6 @@ func formEquation(op *token.Token, lhs *ast.Node, rhs *ast.Node) *ast.Node {
     return operatorNode
 }
 
-// nextEquationToken retrieves the next token from equationTokens list and advances the cursor.
-// If the cursor is at the end of the token list, it returns nil to indicate that there are no more tokens.
-func (p *Parser) nextEquationToken() *token.Token {
-    if p.equationCursor >= len(p.root.EquationTokens) {
-        return nil
-    }
-    tok := p.root.EquationTokens[p.equationCursor]
-    p.equationCursor++
-    return tok
-}
-
-// peekEquationToken retrieves the next token from equationTokens without advancing the cursor.
-// If the cursor is at the end of the token list, it returns nil to indicate that there are no more tokens.
-func (p *Parser) peekEquationToken() *token.Token {
-    if p.equationCursor >= len(p.root.EquationTokens) {
-        return nil
-    }
-    return p.root.EquationTokens[p.equationCursor]
-}
-
 // infixBindingPower returns the left and right binding powers for different operators.
 func infixBindingPower(operatorToken *token.Token) (int, int) {
     switch operatorToken.LexicalType {
@@ -276,7 +283,7 @@ func infixBindingPower(operatorToken *token.Token) (int, int) {
     return 0, 0
 }
 
-// infixBindingPower returns the left and right binding powers for different operators.
+// prefixBindingPower returns the right binding powers for prefix operators like '+' and '-'.
 func prefixBindingPower(operatorToken *token.Token) int {
     switch operatorToken.LexicalType {
     case token.PLUS:
@@ -286,26 +293,6 @@ func prefixBindingPower(operatorToken *token.Token) int {
     default:
         return 0
     }
-}
-
-// isAns checks whether a token is an 'ans' token.
-func isAns(tok *token.Token) bool {
-    if tok != nil {
-        return tok.LexicalType == token.ANS
-    }
-    return false
-}
-
-// operatorSet stores all operator type.
-var operatorSet = map[string]struct{}{token.PLUS: {}, token.MINUS: {}, token.SLASH: {}, token.ASTERISK: {}, token.CIRCUMFLEX: {}}
-
-// isOperator checks whether a token is an operator.
-func isOperator(tok *token.Token) bool {
-    if tok != nil {
-        _, ok := operatorSet[tok.LexicalType]
-        return ok
-    }
-    return false
 }
 
 // isInt checks whether a token is an integer.
@@ -324,8 +311,14 @@ func isFloat(tok *token.Token) bool {
     return false
 }
 
-var correspondingRightBracket = map[string]string{token.LPAREN: token.RPAREN, token.LSQBRACK: token.RSQBRACK, token.LCURBRACK: token.RCURBRACK}
-var correspondingLeftBracket = map[string]string{token.RPAREN: token.LPAREN, token.RSQBRACK: token.LSQBRACK, token.RCURBRACK: token.LCURBRACK}
+// isOperator checks whether a token is an operator.
+func isOperator(tok *token.Token) bool {
+    if tok != nil {
+        _, ok := operatorSet[tok.LexicalType]
+        return ok
+    }
+    return false
+}
 
 // isLeftBracket checks whether a token is a left bracket.
 func isLeftBracket(tok *token.Token) bool {
@@ -337,13 +330,21 @@ func isLeftBracket(tok *token.Token) bool {
     return ok
 }
 
-// isLeftBracket checks whether a token is a right bracket.
+// isRightBracket checks whether a token is a right bracket.
 func isRightBracket(tok *token.Token) bool {
     if tok == nil {
         return false
     }
     _, ok := correspondingLeftBracket[tok.LexicalType]
     return ok
+}
+
+// isAns checks whether a token is an 'ans' token.
+func isAns(tok *token.Token) bool {
+    if tok != nil {
+        return tok.LexicalType == token.ANS
+    }
+    return false
 }
 
 // hasBalanceBrackets checks whether the tokens has balances parentheses.
