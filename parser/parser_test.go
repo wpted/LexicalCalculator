@@ -2,8 +2,8 @@ package parser
 
 import (
     "LexicalCalculator/ast"
-    "LexicalCalculator/helper"
     "LexicalCalculator/lexer"
+    "LexicalCalculator/support"
     "LexicalCalculator/token"
     "errors"
     "testing"
@@ -166,7 +166,7 @@ func TestParser_Parse(t *testing.T) {
                 }
                 p.result = val
                 // Setting epsilon as accuracy.
-                if !helper.AlmostEqual(val, float64(tc.result), 0.0001) {
+                if !support.AlmostEqual(val, float64(tc.result), 0.0001) {
                     t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
                 }
             }

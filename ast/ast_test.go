@@ -1,7 +1,7 @@
 package ast
 
 import (
-    "LexicalCalculator/helper"
+    "LexicalCalculator/support"
     "testing"
 )
 
@@ -175,7 +175,7 @@ func TestEvaluate(t *testing.T) {
             t.Errorf("Error evaluating node, got err: %v.\n", err)
         }
 
-        if !helper.AlmostEqual(re, tc.result, 0.0001) {
+        if !support.AlmostEqual(re, tc.result, 0.0001) {
             t.Errorf("Error evaluating node: expected %f, got %f.\n", tc.result, re)
         }
     }
