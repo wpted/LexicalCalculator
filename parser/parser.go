@@ -145,7 +145,7 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
 
     case isOperator(lhsTok):
         rbp := prefixBindingPower(lhsTok)
-        // Scenario: Unknown operator.
+        // Scenario: Unknown operator, we shouldn't have operators other than '+' and '-'.
         if rbp == 0 {
             return nil, ErrEquation
         }
@@ -160,6 +160,8 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
 
     case isLeftBracket(lhsTok):
         var err error
+
+        // We know that an equation expression should exist within the bracket (no matter valid or not).
         lhs, err = p.parseEquation(0)
         if err != nil {
             // Cases like [(12 + 3 * 6] + 1 might happen.
@@ -268,6 +270,8 @@ func infixBindingPower(operatorToken *token.Token) (int, int) {
         return 3, 4
     case token.SLASH:
         return 3, 4
+    case token.CIRCUMFLEX:
+        return 6, 7
     }
     return 0, 0
 }
@@ -293,7 +297,7 @@ func isAns(tok *token.Token) bool {
 }
 
 // operatorSet stores all operator type.
-var operatorSet = map[string]struct{}{token.PLUS: {}, token.MINUS: {}, token.SLASH: {}, token.ASTERISK: {}}
+var operatorSet = map[string]struct{}{token.PLUS: {}, token.MINUS: {}, token.SLASH: {}, token.ASTERISK: {}, token.CIRCUMFLEX: {}}
 
 // isOperator checks whether a token is an operator.
 func isOperator(tok *token.Token) bool {
