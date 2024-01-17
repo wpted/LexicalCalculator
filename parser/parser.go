@@ -22,7 +22,7 @@ type Parser struct {
     currToken      *token.Token
     nextToken      *token.Token
     equationCursor int
-    result         float32
+    result         float64
 }
 
 // New creates a new instance of a Parser.
@@ -31,7 +31,7 @@ func New(l *lexer.Lexer) *Parser {
 }
 
 // Evaluate takes input and calculates the result.
-func (p *Parser) Evaluate(input string) (float32, error) {
+func (p *Parser) Evaluate(input string) (float64, error) {
     p.input(input)
     err := p.parsePrompt()
     if err != nil {
@@ -138,10 +138,10 @@ func (p *Parser) parseEquation(minbp int) (*ast.Node, error) {
     switch {
     case isInt(lhsTok):
         lhsVal, _ := strconv.Atoi(lhsTok.Literal)
-        lhs = ast.New(lhsTok, float32(lhsVal), true, "", false, nil, nil)
+        lhs = ast.New(lhsTok, float64(lhsVal), true, "", false, nil, nil)
     case isFloat(lhsTok):
         lhsVal, _ := strconv.ParseFloat(lhsTok.Literal, 32)
-        lhs = ast.New(lhsTok, float32(lhsVal), true, "", false, nil, nil)
+        lhs = ast.New(lhsTok, lhsVal, true, "", false, nil, nil)
 
     case isOperator(lhsTok):
         rbp := prefixBindingPower(lhsTok)

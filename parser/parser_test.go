@@ -174,7 +174,7 @@ func TestParser_Parse(t *testing.T) {
                 }
                 p.result = val
                 // Setting epsilon as accuracy.
-                if !almostEqual(float64(val), float64(tc.result), 0.0001) {
+                if !almostEqual(val, float64(tc.result), 0.0001) {
                     t.Errorf("error calculated value: expected %f, got %f.\n", tc.result, val)
                 }
             }

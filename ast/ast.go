@@ -30,7 +30,7 @@ type Node struct {
     IsOperator bool
     Operator   string
     IsValue    bool
-    Value      float32
+    Value      float64
     Left       *Node
     Right      *Node
 }
@@ -39,7 +39,7 @@ type Node struct {
 // S-expression
 func (n *Node) String() string {
     if n.Left == nil && n.Right == nil {
-        return fmt.Sprintf("%d", n.Value)
+        return fmt.Sprintf("%.4f", n.Value)
     } else if n.Left == nil && n.Right != nil {
         return fmt.Sprintf("(%s %s %s)", n.Operator, "0", n.Right.String())
     } else {
@@ -48,7 +48,7 @@ func (n *Node) String() string {
 }
 
 // New creates a new Node.
-func New(tok *token.Token, value float32, isValue bool, operation string, isOperator bool, leftChild *Node, rightNode *Node) *Node {
+func New(tok *token.Token, value float64, isValue bool, operation string, isOperator bool, leftChild *Node, rightNode *Node) *Node {
     return &Node{
         Token:      tok,
         IsOperator: isOperator,
@@ -61,7 +61,7 @@ func New(tok *token.Token, value float32, isValue bool, operation string, isOper
 }
 
 // Evaluate evaluates the current node and return the result of the equation.
-func Evaluate(equationNode *Node) (float32, error) {
+func Evaluate(equationNode *Node) (float64, error) {
     // Scenarios
     // 1. 6 ( One single integer )
     // 2. -6 ( Negative integer )

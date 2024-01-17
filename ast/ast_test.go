@@ -11,42 +11,42 @@ func TestNode_String(t *testing.T) {
     }{
         {
             node: New(nil, 1, true, "", false, nil, nil),
-            str:  "1",
+            str:  "1.0000",
         },
         {
             node: New(nil, 0, false, "+", true,
                 nil,
                 New(nil, 2, true, "", false, nil, nil),
             ),
-            str: "(+ 0 2)",
+            str: "(+ 0 2.0000)",
         },
         {
             node: New(nil, 0, false, "+", true,
                 New(nil, 3, true, "", false, nil, nil),
                 New(nil, 2, true, "", false, nil, nil),
             ),
-            str: "(+ 3 2)",
+            str: "(+ 3.0000 2.0000)",
         },
         {
             node: New(nil, 0, false, "-", true,
                 New(nil, 3, true, "", false, nil, nil),
                 New(nil, 2, true, "", false, nil, nil),
             ),
-            str: "(- 3 2)",
+            str: "(- 3.0000 2.0000)",
         },
         {
             node: New(nil, 0, false, "*", true,
                 New(nil, 3, true, "", false, nil, nil),
                 New(nil, 2, true, "", false, nil, nil),
             ),
-            str: "(* 3 2)",
+            str: "(* 3.0000 2.0000)",
         },
         {
             node: New(nil, 0, false, "/", true,
                 New(nil, 3, true, "", false, nil, nil),
                 New(nil, 2, true, "", false, nil, nil),
             ),
-            str: "(/ 3 2)",
+            str: "(/ 3.0000 2.0000)",
         },
         {
             node: New(nil, 0, false, "+", true,
@@ -56,7 +56,7 @@ func TestNode_String(t *testing.T) {
                     New(nil, 3, true, "", false, nil, nil),
                 ),
             ),
-            str: "(+ 5 (* 2 3))",
+            str: "(+ 5.0000 (* 2.0000 3.0000))",
         },
         {
             node: New(nil, 0, false, "-", true,
@@ -72,7 +72,7 @@ func TestNode_String(t *testing.T) {
                     New(nil, 2, true, "", false, nil, nil),
                 ),
             ),
-            str: "(- (+ 1 (* 2 5)) (* 3 2))",
+            str: "(- (+ 1.0000 (* 2.0000 5.0000)) (* 3.0000 2.0000))",
         },
     }
 
@@ -94,7 +94,7 @@ func TestEvaluate(t *testing.T) {
         root   *Node
         left   *Node
         right  *Node
-        result float32
+        result float64
     }{
         {
             // nil node
