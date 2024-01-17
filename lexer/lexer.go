@@ -12,9 +12,7 @@ import (
     "fmt"
 )
 
-var (
-    ErrInvalidLiteral = errors.New("error token not valid")
-)
+var ErrInvalidLiteral = errors.New("error token not valid")
 
 // Lexer is the lexical analyzer used in the calculator.
 // It's supposed to be called by a parser and will lazily return the next token on the fly.
@@ -44,14 +42,6 @@ func (l *Lexer) Input(data string) {
     // If the buffer becomes too large, Write will panic with ErrTooLarge.
     writtenLength, _ := l.inputBuffer.Write([]byte(data))
     l.bufferLength = writtenLength
-}
-
-// free resets the buffer to be empty, but it retains the underlying storage for use by future writes.
-func (l *Lexer) free() {
-    l.inputBuffer.Reset()
-    l.bufferLength = 0
-    l.currPosition = -1
-    l.nextPosition = 0
 }
 
 // ReadNextToken returns a token after every read, skipping all encountered white spaces.
@@ -135,6 +125,14 @@ func (l *Lexer) ReadNextToken() *token.Token {
         }
     }
     return tok
+}
+
+// free resets the buffer to be empty, but it retains the underlying storage for use by future writes.
+func (l *Lexer) free() {
+    l.inputBuffer.Reset()
+    l.bufferLength = 0
+    l.currPosition = -1
+    l.nextPosition = 0
 }
 
 // readNumber returns the integer literal of a number.
