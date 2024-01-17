@@ -31,7 +31,7 @@ func TestLexer_ReadNextToken(t *testing.T) {
             },
         },
         {
-            input: "+-*/'()[]{}",
+            input: "+-*/'()[]{}^",
             result: []token.Token{
                 {Literal: "+", LexicalType: token.PLUS},
                 {Literal: "-", LexicalType: token.MINUS},
@@ -44,6 +44,7 @@ func TestLexer_ReadNextToken(t *testing.T) {
                 {Literal: "]", LexicalType: token.RSQBRACK},
                 {Literal: "{", LexicalType: token.LCURBRACK},
                 {Literal: "}", LexicalType: token.RCURBRACK},
+                {Literal: "^", LexicalType: token.CIRCUMFLEX},
                 {Literal: token.EOF, LexicalType: token.EOF},
             },
         },
@@ -127,6 +128,18 @@ func TestLexer_ReadNextToken(t *testing.T) {
                 {Literal: "'", LexicalType: token.SINGLEQUOTE},
                 {Literal: "4", LexicalType: token.INT},
                 {Literal: "-", LexicalType: token.MINUS},
+                {Literal: "2", LexicalType: token.INT},
+                {Literal: "'", LexicalType: token.SINGLEQUOTE},
+                {Literal: "EOF", LexicalType: token.EOF},
+            },
+        },
+        {
+            input: "calc '4 ^ 2'",
+            result: []token.Token{
+                {Literal: "calc", LexicalType: token.CALC},
+                {Literal: "'", LexicalType: token.SINGLEQUOTE},
+                {Literal: "4", LexicalType: token.INT},
+                {Literal: "^", LexicalType: token.CIRCUMFLEX},
                 {Literal: "2", LexicalType: token.INT},
                 {Literal: "'", LexicalType: token.SINGLEQUOTE},
                 {Literal: "EOF", LexicalType: token.EOF},
