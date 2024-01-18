@@ -33,14 +33,14 @@ Binding power         5     1   2     3   4   6   7
                      rbp   lbp  rbp
 ```
 
-In each loop we compare lbp and the passed-in min_bp, if lbp is greater, the operator has higher priority.
+In each loop we compare lbp and the passed-in min_bp. If lbp is greater, the operator has higher priority.
 
 
 ## Implementation Steps
 
 1. Create a lexer that tokenizes the input.
-2. Create a parser that parses the tokens, and turns it into an AST.
-   To build the AST, I selected Pratt Parsing and S-Expression instead of using the Shunting Yard algorithm and stacks.
+2. Create a parser that parses the tokens, and turn the tokens into an AST.
+   To build the AST, I selected **Pratt Parsing** and **S-Expression** instead of using the Shunting Yard algorithm and stacks.
 3. Evaluate the AST and output the calculated results.
 
 ## Program
@@ -63,7 +63,7 @@ or compile it first then run the corresponding executable on different platforms
   calculator.exe
 ```
 
-You can also run the existing binaries from the repo.
+You can also run the existing binaries pulled directly from the repo.
 
 ```shell
   # On Linux
@@ -83,7 +83,7 @@ After starting the program you'll see:
     >> Insert your prompt:
 ```
 
-There is two type of prompt:
+There are two types of prompt:
 
 1. **Calculator prompts**
 2. **Quit prompts**
@@ -191,10 +191,10 @@ To quit the calculator:
     // First prompt
     calc '1 + 2'        // result: 3.0000
    
-    // use 'ans' to called stored results
+    // use 'ans' to call stored results
     calc 'ans * 12'     // result: 36.0000
    
-    // The current ans is 36.00
+    // The current 'ans' is 36.00
     calc 'ans'          // result: 36.0000
    
     // Clear 'ans'
@@ -206,15 +206,15 @@ To quit the calculator:
 
 ## References
 
-## Tools:
+### Tools:
 
 - [AST Explorer](https://astexplorer.net)
 
-## Video:
+### Video:
 
 - [Swift 3 Fun Algorithms: Abstract Syntax Tree](https://www.youtube.com/watch?v=r14Vtwi2k7s)
 
-## Reads:
+### Reads:
 
 - [Wikipedia: Shunting yard algorithm](https://en.wikipedia.org/wiki/Shunting_yard_algorithm#The_algorithm_in_detail)
 - [Wikipedia: S-expression](https://en.wikipedia.org/wiki/S-expression)
